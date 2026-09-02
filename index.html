@@ -1106,8 +1106,8 @@
     setTheme(savedTheme);
 
     // CLICK-TO-FULLSCREEN FOR PROJECT VIDEOS
-    // Mobile (<=768px): a single tap opens fullscreen.
-    // Tablet/desktop (>768px): requires a double click.
+    // Works with a single click/tap on every device (mobile, tablet, desktop),
+    // and a double click also works on tablet/desktop.
     function requestFs(el) {
       if (el.requestFullscreen) return el.requestFullscreen();
       if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen();
@@ -1116,19 +1116,14 @@
     function fsElement() {
       return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || null;
     }
-    function isMobileView() {
-      return window.matchMedia('(max-width: 768px)').matches;
-    }
     document.querySelectorAll('.video-embed').forEach(embed => {
       const overlay = embed.querySelector('.video-fs-overlay');
       if (!overlay) return;
       overlay.addEventListener('click', () => {
-        if (!isMobileView()) return;
         requestFs(embed);
         overlay.style.pointerEvents = 'none';
       });
       overlay.addEventListener('dblclick', () => {
-        if (isMobileView()) return;
         requestFs(embed);
         overlay.style.pointerEvents = 'none';
       });
