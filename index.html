@@ -349,6 +349,33 @@
       z-index: 3;
       cursor: pointer;
       background: transparent;
+      pointer-events: auto;
+    }
+    @media (min-width: 769px) {
+      .video-fs-overlay { pointer-events: none; }
+    }
+    .video-fs-btn {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      z-index: 4;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.55);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      pointer-events: auto;
+      transition: var(--transition);
+    }
+    .video-fs-btn svg { width: 16px; height: 16px; }
+    .video-fs-btn:hover { background: var(--accent); color: #111; border-color: var(--accent); }
+    @media (min-width: 769px) {
+      .video-fs-btn { display: flex; }
     }
     .video-embed:fullscreen,
     .video-embed:-webkit-full-screen {
@@ -605,6 +632,7 @@
           <div class="video-embed">
             <iframe src="https://streamable.com/e/6kj0zz?loop=0" allowfullscreen></iframe>
           <div class="video-fs-overlay" aria-hidden="true"></div>
+          <button class="video-fs-btn" type="button" aria-label="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
           </div>
           <div class="video-info">
             <h3 class="video-title" data-i18n="videos.v1.title">Committment</h3>
@@ -614,6 +642,7 @@
           <div class="video-embed">
             <iframe src="https://streamable.com/e/1ta9fc?loop=0" allowfullscreen></iframe>
           <div class="video-fs-overlay" aria-hidden="true"></div>
+          <button class="video-fs-btn" type="button" aria-label="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
           </div>
           <div class="video-info">
             <h3 class="video-title" data-i18n="videos.v2.title">Petrodoller concept</h3>
@@ -623,6 +652,7 @@
           <div class="video-embed">
             <iframe src="https://streamable.com/e/na6ruu?loop=0" allowfullscreen></iframe>
           <div class="video-fs-overlay" aria-hidden="true"></div>
+          <button class="video-fs-btn" type="button" aria-label="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
           </div>
           <div class="video-info">
             <h3 class="video-title" data-i18n="videos.v3.title">Seamless Movement</h3>
@@ -632,6 +662,7 @@
           <div class="video-embed">
             <iframe src="https://streamable.com/e/crf0gr?loop=0" allowfullscreen></iframe>
           <div class="video-fs-overlay" aria-hidden="true"></div>
+          <button class="video-fs-btn" type="button" aria-label="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
           </div>
           <div class="video-info">
             <h3 class="video-title" data-i18n="videos.v4.title">Save your clint</h3>
@@ -641,6 +672,7 @@
           <div class="video-embed">
             <iframe src="https://streamable.com/e/lq2gll?loop=0" allowfullscreen></iframe>
           <div class="video-fs-overlay" aria-hidden="true"></div>
+          <button class="video-fs-btn" type="button" aria-label="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
           </div>
           <div class="video-info">
             <h3 class="video-title" data-i18n="videos.v5.title">Behind the Scenes</h3>
@@ -662,6 +694,7 @@
               <div class="video-embed">
                 <iframe src="https://streamable.com/e/6kj0zz?loop=0" allowfullscreen></iframe>
               <div class="video-fs-overlay" aria-hidden="true"></div>
+              <button class="video-fs-btn" type="button" aria-label="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
               </div>
               <div class="video-info">
                 <h3 class="video-title" data-i18n="videos.v1.title">Committment</h3>
@@ -671,6 +704,7 @@
               <div class="video-embed">
                 <iframe src="https://streamable.com/e/1ta9fc?loop=0" allowfullscreen></iframe>
               <div class="video-fs-overlay" aria-hidden="true"></div>
+              <button class="video-fs-btn" type="button" aria-label="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
               </div>
               <div class="video-info">
                 <h3 class="video-title" data-i18n="videos.v2.title">Petrodoller concept</h3>
@@ -680,6 +714,7 @@
               <div class="video-embed">
                 <iframe src="https://streamable.com/e/na6ruu?loop=0" allowfullscreen></iframe>
               <div class="video-fs-overlay" aria-hidden="true"></div>
+              <button class="video-fs-btn" type="button" aria-label="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
               </div>
               <div class="video-info">
                 <h3 class="video-title" data-i18n="videos.v3.title">Seamless Movement</h3>
@@ -691,6 +726,7 @@
               <div class="video-embed">
                 <iframe src="https://streamable.com/e/crf0gr?loop=0" allowfullscreen></iframe>
               <div class="video-fs-overlay" aria-hidden="true"></div>
+              <button class="video-fs-btn" type="button" aria-label="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
               </div>
               <div class="video-info">
                 <h3 class="video-title" data-i18n="videos.v4.title">Save your clint</h3>
@@ -700,6 +736,7 @@
               <div class="video-embed">
                 <iframe src="https://streamable.com/e/lq2gll?loop=0" allowfullscreen></iframe>
               <div class="video-fs-overlay" aria-hidden="true"></div>
+              <button class="video-fs-btn" type="button" aria-label="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
               </div>
               <div class="video-info">
                 <h3 class="video-title" data-i18n="videos.v5.title">Behind the Scenes</h3>
@@ -1106,8 +1143,9 @@
     setTheme(savedTheme);
 
     // CLICK-TO-FULLSCREEN FOR PROJECT VIDEOS
-    // Works with a single click/tap on every device (mobile, tablet, desktop),
-    // and a double click also works on tablet/desktop.
+    // Mobile (<=768px): the whole video area is tappable — a single tap opens fullscreen.
+    // Tablet/desktop (>768px): a single click reaches Streamable's own player controls
+    // normally (play/pause/etc.); a small corner button opens fullscreen on double click.
     function requestFs(el) {
       if (el.requestFullscreen) return el.requestFullscreen();
       if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen();
@@ -1116,23 +1154,32 @@
     function fsElement() {
       return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || null;
     }
+    function isMobileView() {
+      return window.matchMedia('(max-width: 768px)').matches;
+    }
     document.querySelectorAll('.video-embed').forEach(embed => {
       const overlay = embed.querySelector('.video-fs-overlay');
-      if (!overlay) return;
-      overlay.addEventListener('click', () => {
-        requestFs(embed);
-        overlay.style.pointerEvents = 'none';
-      });
-      overlay.addEventListener('dblclick', () => {
-        requestFs(embed);
-        overlay.style.pointerEvents = 'none';
-      });
+      const btn = embed.querySelector('.video-fs-btn');
+      if (overlay) {
+        overlay.addEventListener('click', () => {
+          if (!isMobileView()) return;
+          requestFs(embed);
+          overlay.style.pointerEvents = 'none';
+        });
+      }
+      if (btn) {
+        btn.addEventListener('click', (e) => e.stopPropagation());
+        btn.addEventListener('dblclick', (e) => {
+          e.stopPropagation();
+          requestFs(embed);
+        });
+      }
     });
     ['fullscreenchange', 'webkitfullscreenchange', 'msfullscreenchange'].forEach(evt => {
       document.addEventListener(evt, () => {
         if (!fsElement()) {
           document.querySelectorAll('.video-fs-overlay').forEach(overlay => {
-            overlay.style.pointerEvents = 'auto';
+            overlay.style.pointerEvents = '';
           });
         }
       });
