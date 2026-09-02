@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
@@ -302,15 +301,15 @@
       box-sizing: border-box;
     }
     .mobile-video-row-3 { display: flex; gap: 10px; }
-    .mobile-video-row-3 .video-item-wrapper { flex: 1; min-width: 0; }
+    .mobile-video-row-3 .video-item-wrapper { flex: 0 0 calc((100% - 20px) / 3); min-width: 0; }
     .mobile-video-row-3 .video-embed { aspect-ratio: 266/745; border-radius: 14px; }
     .mobile-video-row-2 { display: flex; gap: 10px; align-items: flex-start; margin-top: 20px; }
-    .mobile-video-row-2 .video-item-wrapper { flex: 1; min-width: 0; }
-    .mobile-video-row-2 .video-item-wrapper.video-item-wide { flex: 2; }
+    .mobile-video-row-2 .video-item-wrapper { flex: 0 0 calc((100% - 20px) / 3); min-width: 0; }
+    .mobile-video-row-2 .video-item-wrapper.video-item-wide { flex: 1 1 auto; }
     .mobile-video-row-2 .video-embed { aspect-ratio: 266/745; border-radius: 14px; }
     .mobile-video-row-2 .video-item-wide .video-embed { aspect-ratio: 540/476; }
     .mobile-work .video-title { font-size: 0.95rem; letter-spacing: 0.3px; }
-    .mobile-work .video-info { padding: 6px 12px; max-width: 96%; }
+    .mobile-work .video-info { padding: 6px 12px; }
     .video-item-wrapper {
       position: relative;
       background: transparent;
@@ -344,6 +343,27 @@
       border: none;
       display: block;
     }
+    .video-fs-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      cursor: pointer;
+      background: transparent;
+    }
+    .video-embed:fullscreen,
+    .video-embed:-webkit-full-screen {
+      border-radius: 0;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+    }
+    .video-embed:fullscreen iframe,
+    .video-embed:-webkit-full-screen iframe {
+      width: 100%;
+      height: 100%;
+    }
     .video-info {
       position: static;
       margin-top: 16px;
@@ -354,9 +374,8 @@
       padding: 8px 20px;
       box-shadow: 0 10px 25px var(--shadow);
       white-space: nowrap;
-      max-width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      width: max-content;
+      max-width: none;
     }
     .video-category {
       font-family: var(--font-hand);
@@ -370,8 +389,6 @@
       font-weight: 400;
       letter-spacing: 0.5px;
       margin: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
       display: block;
     }
     .video-desc {
@@ -587,6 +604,7 @@
         <div class="video-item-wrapper fade-in">
           <div class="video-embed">
             <iframe src="https://streamable.com/e/6kj0zz?loop=0" allowfullscreen></iframe>
+          <div class="video-fs-overlay" aria-hidden="true"></div>
           </div>
           <div class="video-info">
             <h3 class="video-title" data-i18n="videos.v1.title">Committment</h3>
@@ -595,6 +613,7 @@
         <div class="video-item-wrapper fade-in">
           <div class="video-embed">
             <iframe src="https://streamable.com/e/1ta9fc?loop=0" allowfullscreen></iframe>
+          <div class="video-fs-overlay" aria-hidden="true"></div>
           </div>
           <div class="video-info">
             <h3 class="video-title" data-i18n="videos.v2.title">Petrodoller concept</h3>
@@ -603,6 +622,7 @@
         <div class="video-item-wrapper fade-in">
           <div class="video-embed">
             <iframe src="https://streamable.com/e/na6ruu?loop=0" allowfullscreen></iframe>
+          <div class="video-fs-overlay" aria-hidden="true"></div>
           </div>
           <div class="video-info">
             <h3 class="video-title" data-i18n="videos.v3.title">Seamless Movement</h3>
@@ -611,6 +631,7 @@
         <div class="video-item-wrapper fade-in">
           <div class="video-embed">
             <iframe src="https://streamable.com/e/crf0gr?loop=0" allowfullscreen></iframe>
+          <div class="video-fs-overlay" aria-hidden="true"></div>
           </div>
           <div class="video-info">
             <h3 class="video-title" data-i18n="videos.v4.title">Save your clint</h3>
@@ -619,6 +640,7 @@
         <div class="video-item-wrapper video-item-wide fade-in">
           <div class="video-embed">
             <iframe src="https://streamable.com/e/lq2gll?loop=0" allowfullscreen></iframe>
+          <div class="video-fs-overlay" aria-hidden="true"></div>
           </div>
           <div class="video-info">
             <h3 class="video-title" data-i18n="videos.v5.title">Behind the Scenes</h3>
@@ -639,6 +661,7 @@
             <div class="video-item-wrapper">
               <div class="video-embed">
                 <iframe src="https://streamable.com/e/6kj0zz?loop=0" allowfullscreen></iframe>
+              <div class="video-fs-overlay" aria-hidden="true"></div>
               </div>
               <div class="video-info">
                 <h3 class="video-title" data-i18n="videos.v1.title">Committment</h3>
@@ -647,6 +670,7 @@
             <div class="video-item-wrapper">
               <div class="video-embed">
                 <iframe src="https://streamable.com/e/1ta9fc?loop=0" allowfullscreen></iframe>
+              <div class="video-fs-overlay" aria-hidden="true"></div>
               </div>
               <div class="video-info">
                 <h3 class="video-title" data-i18n="videos.v2.title">Petrodoller concept</h3>
@@ -655,6 +679,7 @@
             <div class="video-item-wrapper">
               <div class="video-embed">
                 <iframe src="https://streamable.com/e/na6ruu?loop=0" allowfullscreen></iframe>
+              <div class="video-fs-overlay" aria-hidden="true"></div>
               </div>
               <div class="video-info">
                 <h3 class="video-title" data-i18n="videos.v3.title">Seamless Movement</h3>
@@ -665,6 +690,7 @@
             <div class="video-item-wrapper">
               <div class="video-embed">
                 <iframe src="https://streamable.com/e/crf0gr?loop=0" allowfullscreen></iframe>
+              <div class="video-fs-overlay" aria-hidden="true"></div>
               </div>
               <div class="video-info">
                 <h3 class="video-title" data-i18n="videos.v4.title">Save your clint</h3>
@@ -673,6 +699,7 @@
             <div class="video-item-wrapper video-item-wide">
               <div class="video-embed">
                 <iframe src="https://streamable.com/e/lq2gll?loop=0" allowfullscreen></iframe>
+              <div class="video-fs-overlay" aria-hidden="true"></div>
               </div>
               <div class="video-info">
                 <h3 class="video-title" data-i18n="videos.v5.title">Behind the Scenes</h3>
@@ -1077,6 +1104,33 @@
     const savedTheme = localStorage.getItem('morphine-theme') || 'dark';
     setLanguage(savedLang);
     setTheme(savedTheme);
+
+    // CLICK-TO-FULLSCREEN FOR PROJECT VIDEOS
+    function requestFs(el) {
+      if (el.requestFullscreen) return el.requestFullscreen();
+      if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen();
+      if (el.msRequestFullscreen) return el.msRequestFullscreen();
+    }
+    function fsElement() {
+      return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || null;
+    }
+    document.querySelectorAll('.video-embed').forEach(embed => {
+      const overlay = embed.querySelector('.video-fs-overlay');
+      if (!overlay) return;
+      overlay.addEventListener('click', () => {
+        requestFs(embed);
+        overlay.style.pointerEvents = 'none';
+      });
+    });
+    ['fullscreenchange', 'webkitfullscreenchange', 'msfullscreenchange'].forEach(evt => {
+      document.addEventListener(evt, () => {
+        if (!fsElement()) {
+          document.querySelectorAll('.video-fs-overlay').forEach(overlay => {
+            overlay.style.pointerEvents = 'auto';
+          });
+        }
+      });
+    });
   </script>
 </body>
 </html>
