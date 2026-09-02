@@ -1145,11 +1145,17 @@
     // CLICK-TO-FULLSCREEN FOR PROJECT VIDEOS
     // Mobile (<=768px): the whole video area is tappable — a single tap opens fullscreen.
     // Tablet/desktop (>768px): a single click reaches Streamable's own player controls
-    // normally (play/pause/etc.); a small corner button opens fullscreen on double click.
+    // normally (play/pause/etc.); a small corner button toggles fullscreen with one click
+    // (opens it from the main view, and closes it again while in fullscreen).
     function requestFs(el) {
       if (el.requestFullscreen) return el.requestFullscreen();
       if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen();
       if (el.msRequestFullscreen) return el.msRequestFullscreen();
+    }
+    function exitFs() {
+      if (document.exitFullscreen) return document.exitFullscreen();
+      if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
+      if (document.msExitFullscreen) return document.msExitFullscreen();
     }
     function fsElement() {
       return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || null;
@@ -1168,10 +1174,13 @@
         });
       }
       if (btn) {
-        btn.addEventListener('click', (e) => e.stopPropagation());
-        btn.addEventListener('dblclick', (e) => {
+        btn.addEventListener('click', (e) => {
           e.stopPropagation();
-          requestFs(embed);
+          if (fsElement()) {
+            exitFs();
+          } else {
+            requestFs(embed);
+          }
         });
       }
     });
