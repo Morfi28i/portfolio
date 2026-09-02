@@ -294,40 +294,30 @@
     /* MOBILE WORK CAROUSEL — hidden by default (desktop/tablet uses .desktop-work) */
     .mobile-work { display: none; }
     .mobile-work-track {
-      display: flex;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
+      display: block;
     }
-    .mobile-work-track::-webkit-scrollbar { display: none; }
     .mobile-work-page {
-      flex: 0 0 100%;
-      scroll-snap-align: start;
       padding: 0 16px;
       box-sizing: border-box;
     }
     .mobile-video-row-3 { display: flex; gap: 10px; }
     .mobile-video-row-3 .video-item-wrapper { flex: 1; min-width: 0; }
     .mobile-video-row-3 .video-embed { aspect-ratio: 266/745; border-radius: 14px; }
-    .mobile-video-row-2 { display: flex; gap: 10px; align-items: flex-start; }
+    .mobile-video-row-2 { display: flex; gap: 10px; align-items: flex-start; margin-top: 20px; }
     .mobile-video-row-2 .video-item-wrapper { flex: 1; min-width: 0; }
     .mobile-video-row-2 .video-item-wrapper.video-item-wide { flex: 2; }
     .mobile-video-row-2 .video-embed { aspect-ratio: 266/745; border-radius: 14px; }
     .mobile-video-row-2 .video-item-wide .video-embed { aspect-ratio: 540/476; }
-    .mobile-work-desc-only { margin-bottom: 24px; text-align: center; }
-    .mobile-work-desc-only .section-title { font-size: clamp(1.8rem, 6vw, 2.6rem); margin-bottom: 8px; }
-    .mobile-work-desc-only .section-desc { margin: 0; }
     .mobile-work .video-title { font-size: 0.95rem; letter-spacing: 0.3px; }
-    .mobile-work .video-info { padding: 6px 12px; bottom: -12px; max-width: 96%; }
-    .mobile-work-dots { display: flex; justify-content: center; gap: 8px; margin-top: 24px; }
-    .mw-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); transition: var(--transition); }
-    .mw-dot.active { background: var(--accent); width: 20px; border-radius: 4px; }
+    .mobile-work .video-info { padding: 6px 12px; max-width: 96%; }
     .video-item-wrapper {
       position: relative;
       background: transparent;
       overflow: visible;
-      margin-bottom: 22px;
+      margin-bottom: 34px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     .video-item-wrapper:hover .video-embed {
       border-color: var(--accent);
@@ -354,10 +344,8 @@
       display: block;
     }
     .video-info {
-      position: absolute;
-      left: 50%;
-      bottom: -16px;
-      transform: translateX(-50%);
+      position: static;
+      margin-top: 16px;
       z-index: 2;
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -365,7 +353,9 @@
       padding: 8px 20px;
       box-shadow: 0 10px 25px var(--shadow);
       white-space: nowrap;
-      max-width: 92%;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .video-category {
       font-family: var(--font-hand);
@@ -595,39 +585,39 @@
       <div class="video-grid">
         <div class="video-item-wrapper fade-in">
           <div class="video-embed">
-            <iframe src="https://streamable.com/e/1ta9fc" allowfullscreen></iframe>
+            <iframe src="https://streamable.com/e/6kj0zz?loop=0" allowfullscreen></iframe>
           </div>
           <div class="video-info">
-            <h3 class="video-title" data-i18n="videos.v1.title">Petrodoller concept</h3>
+            <h3 class="video-title" data-i18n="videos.v1.title">Committment</h3>
           </div>
         </div>
         <div class="video-item-wrapper fade-in">
           <div class="video-embed">
-            <iframe src="https://streamable.com/e/crf0gr" allowfullscreen></iframe>
+            <iframe src="https://streamable.com/e/1ta9fc?loop=0" allowfullscreen></iframe>
           </div>
           <div class="video-info">
-            <h3 class="video-title" data-i18n="videos.v2.title">save your clint</h3>
+            <h3 class="video-title" data-i18n="videos.v2.title">Petrodoller concept</h3>
           </div>
         </div>
         <div class="video-item-wrapper fade-in">
           <div class="video-embed">
-            <iframe src="https://streamable.com/e/ikjck2" allowfullscreen></iframe>
+            <iframe src="https://streamable.com/e/na6ruu?loop=0" allowfullscreen></iframe>
           </div>
           <div class="video-info">
-            <h3 class="video-title" data-i18n="videos.v3.title">stop have Dopamine</h3>
+            <h3 class="video-title" data-i18n="videos.v3.title">Seamless Movement</h3>
           </div>
         </div>
         <div class="video-item-wrapper fade-in">
           <div class="video-embed">
-            <iframe src="https://streamable.com/e/h3zdbb" allowfullscreen></iframe>
+            <iframe src="https://streamable.com/e/crf0gr?loop=0" allowfullscreen></iframe>
           </div>
           <div class="video-info">
-            <h3 class="video-title" data-i18n="videos.v4.title">simple Minimal style</h3>
+            <h3 class="video-title" data-i18n="videos.v4.title">Save your clint</h3>
           </div>
         </div>
         <div class="video-item-wrapper video-item-wide fade-in">
           <div class="video-embed">
-            <iframe src="https://streamable.com/e/lq2gll" allowfullscreen></iframe>
+            <iframe src="https://streamable.com/e/lq2gll?loop=0" allowfullscreen></iframe>
           </div>
           <div class="video-info">
             <h3 class="video-title" data-i18n="videos.v5.title">Behind the Scenes</h3>
@@ -647,48 +637,41 @@
           <div class="mobile-video-row-3">
             <div class="video-item-wrapper">
               <div class="video-embed">
-                <iframe src="https://streamable.com/e/1ta9fc" allowfullscreen></iframe>
+                <iframe src="https://streamable.com/e/6kj0zz?loop=0" allowfullscreen></iframe>
               </div>
               <div class="video-info">
-                <h3 class="video-title" data-i18n="videos.v1.title">Petrodoller concept</h3>
+                <h3 class="video-title" data-i18n="videos.v1.title">Committment</h3>
               </div>
             </div>
             <div class="video-item-wrapper">
               <div class="video-embed">
-                <iframe src="https://streamable.com/e/crf0gr" allowfullscreen></iframe>
+                <iframe src="https://streamable.com/e/1ta9fc?loop=0" allowfullscreen></iframe>
               </div>
               <div class="video-info">
-                <h3 class="video-title" data-i18n="videos.v2.title">save your clint</h3>
+                <h3 class="video-title" data-i18n="videos.v2.title">Petrodoller concept</h3>
               </div>
             </div>
             <div class="video-item-wrapper">
               <div class="video-embed">
-                <iframe src="https://streamable.com/e/ikjck2" allowfullscreen></iframe>
+                <iframe src="https://streamable.com/e/na6ruu?loop=0" allowfullscreen></iframe>
               </div>
               <div class="video-info">
-                <h3 class="video-title" data-i18n="videos.v3.title">stop have Dopamine</h3>
+                <h3 class="video-title" data-i18n="videos.v3.title">Seamless Movement</h3>
               </div>
             </div>
-          </div>
-        </div>
-        <div class="mobile-work-page">
-          <div class="section-header fade-in mobile-work-desc-only">
-            <span class="section-label" data-i18n="work.label">Selected Work</span>
-            <h2 class="section-title" data-i18n="work.title">Frames That Speak</h2>
-            <p class="section-desc" data-i18n="work.desc">A curated selection of my best video editing and motion design projects.</p>
           </div>
           <div class="mobile-video-row-2">
             <div class="video-item-wrapper">
               <div class="video-embed">
-                <iframe src="https://streamable.com/e/h3zdbb" allowfullscreen></iframe>
+                <iframe src="https://streamable.com/e/crf0gr?loop=0" allowfullscreen></iframe>
               </div>
               <div class="video-info">
-                <h3 class="video-title" data-i18n="videos.v4.title">simple Minimal style</h3>
+                <h3 class="video-title" data-i18n="videos.v4.title">Save your clint</h3>
               </div>
             </div>
             <div class="video-item-wrapper video-item-wide">
               <div class="video-embed">
-                <iframe src="https://streamable.com/e/lq2gll" allowfullscreen></iframe>
+                <iframe src="https://streamable.com/e/lq2gll?loop=0" allowfullscreen></iframe>
               </div>
               <div class="video-info">
                 <h3 class="video-title" data-i18n="videos.v5.title">Behind the Scenes</h3>
@@ -696,10 +679,6 @@
             </div>
           </div>
         </div>
-      </div>
-      <div class="mobile-work-dots">
-        <span class="mw-dot active"></span>
-        <span class="mw-dot"></span>
       </div>
     </div>
   </section>
@@ -873,14 +852,14 @@
         "skills.sound": "Sound Design", "skills.compositing": "Compositing", "skills.social": "Social Media Content",
         "work.label": "Selected Work", "work.title": "Frames That Speak",
         "work.desc": "A curated selection of my best video editing and motion design projects.",
-        "videos.v1.cat": "Commercial", "videos.v1.title": "Petrodoller concept",
-        "videos.v1.desc": "A bold commercial concept exploring the energy market through dynamic visuals.",
-        "videos.v2.cat": "Motion Graphics", "videos.v2.title": "save your clint",
-        "videos.v2.desc": "Client-focused motion piece built to convert and captivate your audience.",
-        "videos.v3.cat": "Music Video", "videos.v3.title": "stop have Dopamine",
-        "videos.v3.desc": "A fast-paced dopamine-driven edit that hooks viewers from frame one.",
-        "videos.v4.cat": "Social Media", "videos.v4.title": "simple Minimal style",
-        "videos.v4.desc": "Clean, minimal aesthetic with maximum visual impact. Less is more.",
+        "videos.v1.cat": "Brand Film", "videos.v1.title": "Committment",
+        "videos.v1.desc": "A story-driven brand piece built around dedication and follow-through.",
+        "videos.v2.cat": "Commercial", "videos.v2.title": "Petrodoller concept",
+        "videos.v2.desc": "A bold commercial concept exploring the energy market through dynamic visuals.",
+        "videos.v3.cat": "Motion Graphics", "videos.v3.title": "Seamless Movement",
+        "videos.v3.desc": "Fluid, seamless transitions that keep the motion feeling effortless.",
+        "videos.v4.cat": "Motion Graphics", "videos.v4.title": "Save your clint",
+        "videos.v4.desc": "Client-focused motion piece built to convert and captivate your audience.",
         "videos.v5.cat": "Event Coverage", "videos.v5.title": "Behind the Scenes",
         "videos.v5.desc": "Raw, authentic footage capturing the real story behind the production.",
         "services.label": "What I Do", "services.title": "Services I Offer",
@@ -927,14 +906,14 @@
         "skills.sound": "تصميم الصوت", "skills.compositing": "الدمج البصري", "skills.social": "محتوى السوشيال ميديا",
         "work.label": "أعمال مختارة", "work.title": "إطارات تتحدث",
         "work.desc": "مجموعة مختارة من أفضل مشاريع المونتاج والموشن جرافيك.",
-        "videos.v1.cat": "إعلاني", "videos.v1.title": "مفهوم بترودولار",
-        "videos.v1.desc": "فكرة إعلانية جريئة تستكشف سوق الطاقة من خلال بصريات ديناميكية.",
-        "videos.v2.cat": "موشن جرافيك", "videos.v2.title": "أنقذ عميلك",
-        "videos.v2.desc": "عمل موشن موجه للعميل مصمم للتحويل وجذب جمهورك.",
-        "videos.v3.cat": "فيديو كليب", "videos.v3.title": "وقف الدوبامين",
-        "videos.v3.desc": "مونتاج سريع مدفوع بالدوبامين يأسر المشاهدين من أول إطار.",
-        "videos.v4.cat": "سوشيال ميديا", "videos.v4.title": "أسلوب بسيط مينيمال",
-        "videos.v4.desc": "جمالية نظيفة ومينيمال بأقصى تأثير بصري. الأقل هو الأكثر.",
+        "videos.v1.cat": "فيلم علامة تجارية", "videos.v1.title": "التزام",
+        "videos.v1.desc": "عمل مصمم حول فكرة الالتزام والاستمرارية حتى النهاية.",
+        "videos.v2.cat": "إعلاني", "videos.v2.title": "مفهوم بترودولار",
+        "videos.v2.desc": "فكرة إعلانية جريئة تستكشف سوق الطاقة من خلال بصريات ديناميكية.",
+        "videos.v3.cat": "موشن جرافيك", "videos.v3.title": "حركة سلسة",
+        "videos.v3.desc": "انتقالات سلسة ومتدفقة تجعل الحركة تبدو بلا مجهود.",
+        "videos.v4.cat": "موشن جرافيك", "videos.v4.title": "أنقذ عميلك",
+        "videos.v4.desc": "عمل موشن موجه للعميل مصمم للتحويل وجذب جمهورك.",
         "videos.v5.cat": "تغطية فعاليات", "videos.v5.title": "خلف الكواليس",
         "videos.v5.desc": "لقطات خام وأصيلة تلتقط القصة الحقيقية وراء الإنتاج.",
         "services.label": "ما أفعله", "services.title": "الخدمات التي أقدمها",
@@ -981,14 +960,14 @@
         "skills.sound": "Diseño de Sonido", "skills.compositing": "Composición", "skills.social": "Contenido para Redes",
         "work.label": "Trabajos Seleccionados", "work.title": "Fotogramas Que Hablan",
         "work.desc": "Una selección curada de mis mejores proyectos de edición y motion design.",
-        "videos.v1.cat": "Comercial", "videos.v1.title": "Concepto Petrodollar",
-        "videos.v1.desc": "Un concepto comercial audaz que explora el mercado energético a través de visuales dinámicos.",
-        "videos.v2.cat": "Motion Graphics", "videos.v2.title": "Salva a tu Cliente",
-        "videos.v2.desc": "Pieza de motion enfocada en el cliente, diseñada para convertir y cautivar.",
-        "videos.v3.cat": "Video Musical", "videos.v3.title": "stop have Dopamine",
-        "videos.v3.desc": "Una edición rápida impulsada por dopamina que engancha desde el primer fotograma.",
-        "videos.v4.cat": "Redes Sociales", "videos.v4.title": "Estilo Simple Minimal",
-        "videos.v4.desc": "Estética limpia y minimalista con máximo impacto visual. Menos es más.",
+        "videos.v1.cat": "Film de Marca", "videos.v1.title": "Compromiso",
+        "videos.v1.desc": "Una pieza narrativa de marca construida en torno a la dedicación y la constancia.",
+        "videos.v2.cat": "Comercial", "videos.v2.title": "Concepto Petrodollar",
+        "videos.v2.desc": "Un concepto comercial audaz que explora el mercado energético a través de visuales dinámicos.",
+        "videos.v3.cat": "Motion Graphics", "videos.v3.title": "Movimiento Fluido",
+        "videos.v3.desc": "Transiciones fluidas y continuas que hacen que el movimiento se sienta sin esfuerzo.",
+        "videos.v4.cat": "Motion Graphics", "videos.v4.title": "Salva a tu Cliente",
+        "videos.v4.desc": "Pieza de motion enfocada en el cliente, diseñada para convertir y cautivar.",
         "videos.v5.cat": "Cobertura de Eventos", "videos.v5.title": "Detrás de Cámaras",
         "videos.v5.desc": "Metraje crudo y auténtico que captura la historia real detrás de la producción.",
         "services.label": "Qué Hago", "services.title": "Servicios Que Ofrezco",
@@ -1097,15 +1076,6 @@
     const savedTheme = localStorage.getItem('morphine-theme') || 'dark';
     setLanguage(savedLang);
     setTheme(savedTheme);
-
-    const mwTrack = document.querySelector('.mobile-work-track');
-    if (mwTrack) {
-      const mwDots = document.querySelectorAll('.mw-dot');
-      mwTrack.addEventListener('scroll', () => {
-        const index = Math.round(mwTrack.scrollLeft / mwTrack.clientWidth);
-        mwDots.forEach((dot, i) => dot.classList.toggle('active', i === index));
-      });
-    }
   </script>
 </body>
 </html>
