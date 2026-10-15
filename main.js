@@ -656,9 +656,30 @@
           nav.appendChild(s);
           return s;
         });
-        return { ...sec, a, letters };
+        // Arabic: a whole-word copy is shown whenever the title is at rest, so joins stay seamless
+        let whole = null;
+        if (lang === 'ar') {
+          whole = document.createElement('span');
+          whole.className = `train-ch train-whole${sec.hero ? ' is-hero' : ''}`;
+          whole.setAttribute('aria-hidden', 'true');
+          whole.textContent = label;
+          nav.appendChild(whole);
+        }
+        return { ...sec, a, letters, whole };
       });
       layout();
+    }
+
+    // Show either the whole Arabic word (at rest) or its letters (while travelling)
+    function restAs(it, on, x, y, sc) {
+      if (!it.whole) return false;
+      it.whole.style.visibility = on ? '' : 'hidden';
+      it.letters.forEach((s) => { s.style.visibility = on ? 'hidden' : ''; });
+      if (on) {
+        // right-aligned at the slot, like the letters would be
+        place(it.whole, x - (it.wholeW * sc) / 2, y, 0, sc, false);
+      }
+      return on;
     }
 
     // Measure letters and pre-compute each section's travel path (in LTR screen space)
@@ -673,6 +694,7 @@
         it.wid = it.letters.map((s) => { const t0 = s.style.transform; s.style.transform = 'none'; const w = s.getBoundingClientRect().width - seam; s.style.transform = t0; return w; });
         it.adv = it.wid.map((w) => { const c = x + w / 2; x += w; return c; });
         it.W = x;
+        if (it.whole) { const t0 = it.whole.style.transform; it.whole.style.transform = 'none'; it.wholeW = it.whole.getBoundingClientRect().width; it.whole.style.transform = t0; }
         it.yTop = (ar ? 112 : 100) + i * GAP;
         it.yAct = it.yTop + ACT;
         it.yBot = vh - 40 - (n - 1 - i) * GAP;
@@ -769,6 +791,11 @@
           const flying = p > 0.001;
           wm.style.visibility = flying ? 'hidden' : '';
           const big = it.big;
+          if (restAs(it, p >= 1, it.right, it.yTop, SMALL)) {
+            hit(it, it.right - it.W * SMALL, it.yTop - 12, it.W * SMALL, 24, true, rtl);
+            return;
+          }
+          if (it.whole && !flying) it.whole.style.visibility = 'hidden';
           it.letters.forEach((s, k) => {
             if (!flying) { s.style.opacity = 0; return; }
             // Each letter leaves on its own beat (right-most first), fans out mid-flight,
@@ -792,6 +819,11 @@
         if (e >= 1) {
           // Active (large) → shrinks into the stack as the next section arrives
           const xP = ease(exit);
+          if (restAs(it, true, it.right, lerp(it.yAct, it.yTop, xP), lerp(1, SMALL, xP))) {
+            const sc = lerp(1, SMALL, xP), y = lerp(it.yAct, it.yTop, xP);
+            hit(it, it.right - it.W * sc, y - (BASE / 2) * sc, it.W * sc, BASE * sc, true, rtl);
+            return;
+          }
           it.letters.forEach((s, k) => {
             const pk = xP;
             const sc = lerp(1, SMALL, pk);
@@ -807,6 +839,10 @@
         // Travelling: first along the bottom and up the ruler (A), then each letter
         // swings off the ruler into its place in the title (B), top letters first.
         const SPLIT = 0.62;
+        if (restAs(it, e === 0, it.right, it.yBot, SMALL)) {
+          hit(it, it.right - it.W * SMALL, it.yBot - 12, it.W * SMALL, 24, true, rtl);
+          return;
+        }
         if (e < SPLIT) {
           const head = lerp(it.sStart, it.sEnd, ease(e / SPLIT));
           let pos = head;
