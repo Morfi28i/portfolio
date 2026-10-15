@@ -191,9 +191,11 @@ h1, h2, h3, p { margin: 0; }
 }
 
 /* 3D footage field */
-.field { position: absolute; inset: 0; z-index: -2; perspective: 900px; perspective-origin: 50% 50%; filter: var(--grade); }
+.field { position: absolute; inset: 0; z-index: -2; perspective: 900px; perspective-origin: 50% 50%; }
+:root[data-lut] .field { filter: var(--grade); }
 .field-inner { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .6s var(--ease); }
 .shot {
+  backface-visibility: hidden;
   position: absolute; left: 50%; top: 50%; margin: 0; border-radius: 6px; overflow: hidden;
   background: var(--surface); border: 1px solid var(--line); will-change: transform, opacity;
   box-shadow: 0 20px 50px rgb(0 0 0 / .35);
@@ -230,24 +232,22 @@ h1, h2, h3, p { margin: 0; }
 .battery i { width: 4px; height: 7px; background: currentColor; }
 .battery i:last-child { opacity: .25; }
 
-.focus-ring {
-  position: absolute; left: 50%; top: 50%; width: min(86vmin, 760px); aspect-ratio: 1;
-  translate: -50% -50%; fill: none; overflow: visible;
-}
-.ring-ticks { stroke: var(--line); stroke-width: 3; stroke-dasharray: .6 4.4; animation: spin 90s linear infinite; transform-origin: center; }
+.rings { position: absolute; left: 50%; top: 50%; width: min(86vmin, 760px); aspect-ratio: 1; translate: -50% -50%; }
+/* each ring spins as its own layer, so the GPU turns it instead of repainting the SVG */
+.ring { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; fill: none; animation: spin var(--dur) linear infinite; will-change: transform; }
+.ring.rev { animation-direction: reverse; }
+.ring-ticks { stroke: var(--line); stroke-width: 3; stroke-dasharray: .6 4.4; }
 .ring-arc {
   stroke: var(--accent); stroke-width: .5; stroke-dasharray: 90 463; stroke-linecap: round; opacity: .8;
-  animation: spin 24s linear infinite; transform-origin: center;
 }
-.ring-thin { stroke: color-mix(in srgb, var(--teal) 40%, transparent); stroke-width: .3; stroke-dasharray: 2 6; animation: spin 60s linear infinite reverse; transform-origin: center; }
+.ring-thin { stroke: color-mix(in srgb, var(--teal) 40%, transparent); stroke-width: .3; stroke-dasharray: 2 6; }
 
 /* Centre content */
 .hero-center::before {
   /* frosted halo so passing footage never fights the text */
   content: ""; position: absolute; inset: -20% -16%; z-index: -1; pointer-events: none;
-  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-  -webkit-mask: radial-gradient(closest-side, #000 55%, transparent);
-          mask: radial-gradient(closest-side, #000 55%, transparent);
+  /* a soft dark halo (a live backdrop blur over moving footage was too heavy) */
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--bg) 82%, transparent) 45%, color-mix(in srgb, var(--bg) 45%, transparent) 75%, transparent);
 }
 .hero-center { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; width: min(100%, 1100px); }
 .hero-label { color: var(--accent); margin-bottom: 14px; }
@@ -307,10 +307,10 @@ h1, h2, h3, p { margin: 0; }
 .intro-bar i { display: block; height: 100%; background: var(--accent); transform-origin: left; animation: grow .8s linear both; }
 
 /* Orbit rings */
-.orbit { stroke-width: .35; transform-origin: center; opacity: .85; }
-.o1 { stroke: var(--accent); stroke-dasharray: 260 590; animation: spin 38s linear infinite; }
-.o2 { stroke: var(--teal); stroke-dasharray: 340 760; animation: spin 52s linear infinite reverse; }
-.o3 { stroke: var(--rec); stroke-dasharray: 220 1160; animation: spin 70s linear infinite; opacity: .6; }
+.orbit { stroke-width: .35; opacity: .85; }
+.o1 { stroke: var(--accent); stroke-dasharray: 260 590; }
+.o2 { stroke: var(--teal); stroke-dasharray: 340 760; }
+.o3 { stroke: var(--rec); stroke-dasharray: 220 1160; opacity: .6; }
 
 /* Side ruler: percentage scale that scrolls with the page; hover zooms out to the whole page */
 .ruler {
@@ -405,9 +405,9 @@ h1, h2, h3, p { margin: 0; }
 }
 /* sprocket holes */
 .reel::before, .reel::after {
-  content: ""; position: absolute; left: 0; right: 0; height: 5px;
+  content: ""; position: absolute; left: -22px; right: 0; height: 5px;
   background: repeating-linear-gradient(90deg, var(--hole) 0 9px, transparent 9px 22px);
-  animation: holes 1.2s linear infinite;
+  animation: holes 1.2s linear infinite; will-change: transform;
 }
 .reel::before { top: 4px; } .reel::after { bottom: 4px; }
 .reel-track { display: flex; width: max-content; animation: reel 40s linear infinite; }
@@ -706,7 +706,7 @@ h1, h2, h3, p { margin: 0; }
 .cursor.play span { opacity: 1; transform: none; }
 
 .grain {
-  position: fixed; inset: -50%; z-index: 89; pointer-events: none; opacity: .07;
+  position: fixed; inset: -8%; z-index: 89; pointer-events: none; opacity: .07; will-change: transform;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   animation: grain .8s steps(5) infinite;
 }
@@ -908,7 +908,7 @@ main { counter-reset: sec; }
 /* Work cards: aspect-ratio badge like clip metadata */
 .clip-ar {
   position: absolute; z-index: 2; top: 14px; inset-inline-end: 14px; padding: 3px 6px; font-size: 10px; color: #fff;
-  border: 1px solid rgb(255 255 255 / .45); background: rgb(0 0 0 / .25); backdrop-filter: blur(6px);
+  border: 1px solid rgb(255 255 255 / .45); background: rgb(0 0 0 / .45);
 }
 
 /* Portrait: film-strip edges with sprocket holes */
@@ -1032,7 +1032,7 @@ main { counter-reset: sec; }
 @keyframes fade-in { to { opacity: 1; } }
 @keyframes shutter { from { clip-path: inset(0 0 0 0); } to { clip-path: inset(50% 0 50% 0); } }
 @keyframes reel { to { transform: translateX(-50%); } }
-@keyframes holes { to { background-position: 22px 0; } }
+@keyframes holes { to { transform: translateX(22px); } }
 @keyframes pop { from { opacity: 0; transform: scale(.96); } }
 
 /* ============ Responsive ============ */
@@ -1082,3 +1082,17 @@ main { counter-reset: sec; }
 
 /* Keep the viewfinder clear of the timeline ruler */
 @media (min-width: 901px) { .vf { right: 64px; } }
+
+/* ============ Lite mode (phones, modest laptops) ============ */
+/* Everything stays; only the hero halo uses a look-alike gradient instead of a live blur */
+.hero-center::before {
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  -webkit-mask: radial-gradient(closest-side, #000 55%, transparent); mask: radial-gradient(closest-side, #000 55%, transparent);
+  background: none;
+}
+.lite .hero-center::before {
+  backdrop-filter: none; -webkit-backdrop-filter: none; -webkit-mask: none; mask: none;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--bg) 82%, transparent) 45%, color-mix(in srgb, var(--bg) 45%, transparent) 75%, transparent);
+}
+/* depth blur for cards on the far side of the orbit, switched as they pass (not every frame) */
+.shot.far { filter: blur(2px); }

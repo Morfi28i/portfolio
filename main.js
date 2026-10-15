@@ -292,14 +292,16 @@
   const tc = document.getElementById('timecode');
   const start = performance.now();
   const pad = (n) => String(n).padStart(2, '0');
-  const tick = (now) => {
-    const frames = Math.floor(((now - start) / 1000) * 25);
+  let lastFrame = -1;
+  const tick = () => {
+    const frames = Math.floor(((performance.now() - start) / 1000) * 25);
+    if (frames === lastFrame) return;
+    lastFrame = frames;
     const f = frames % 25, s = Math.floor(frames / 25) % 60;
     const m = Math.floor(frames / 1500) % 60, h = Math.floor(frames / 90000);
     tc.textContent = `${pad(h)}:${pad(m)}:${pad(s)}:${pad(f)}`;
-    if (!reduceMotion) requestAnimationFrame(tick);
   };
-  requestAnimationFrame(tick);
+  tick();
 
   /* ---------- Hero footage orbit ---------- */
   // The person's clips circle the wordmark on tilted rings, like footage orbiting the lens.
@@ -331,33 +333,42 @@
     }
   });
 
-  let fieldVisible = true;
+  let fieldVisible = true, fieldRaf = 0;
   new IntersectionObserver(([e]) => {
-    fieldVisible = e.isIntersecting;
     root.classList.toggle('past-hero', !e.isIntersecting);
   }, { rootMargin: '0px 0px -40% 0px' }).observe(field);
+  // Stop the whole loop while the hero is off screen or the tab is hidden
+  const runField = () => { if (!fieldRaf && !reduceMotion) { last = performance.now(); fieldRaf = requestAnimationFrame(drawField); } };
+  new IntersectionObserver(([e]) => { fieldVisible = e.isIntersecting; if (fieldVisible) runField(); }).observe(field);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && fieldVisible) runField(); });
 
   let last = performance.now();
+  let W = field.clientWidth / 2, H = field.clientHeight / 2;
+  addEventListener('resize', () => { W = field.clientWidth / 2; H = field.clientHeight / 2; });
   const drawField = (now) => {
+    fieldRaf = 0;
+    if (!fieldVisible || document.hidden) return;
     const dt = Math.min((now - last) / 1000, 0.05);
     last = now;
-    const W = field.clientWidth / 2, H = field.clientHeight / 2;
+    tick();
     for (const s of shots) {
-      if (!reduceMotion && fieldVisible) s.a += s.ring.speed * dt;
+      if (!reduceMotion) s.a += s.ring.speed * dt;
       const sin = Math.sin(s.a), cos = Math.cos(s.a);
       const x = cos * s.ring.rx * W;
       const y = sin * s.ring.ry * H;
       const z = sin * s.ring.depth;                  // lower half comes forward, upper half recedes
       const front = (sin + 1) / 2;                   // 0 at the back, 1 at the front
-      s.el.style.opacity = (0.35 + front * 0.65).toFixed(3);
-      s.el.style.zIndex = Math.round(front * 100);
-      s.el.style.filter = front < 0.4 ? `blur(${((0.4 - front) * 6).toFixed(1)}px)` : 'none';
+      s.el.style.opacity = (0.3 + front * 0.7).toFixed(2);
+      const zi = Math.round(front * 20);
+      if (zi !== s.zi) { s.zi = zi; s.el.style.zIndex = zi; }
+      const far = front < 0.35;
+      if (far !== s.far) { s.far = far; s.el.classList.toggle('far', far); }
       s.el.style.transform =
         `translate(-50%, -50%) translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, ${z.toFixed(1)}px) rotateY(${(-cos * 18).toFixed(1)}deg) rotate(${s.tilt.toFixed(1)}deg)`;
     }
-    if (!reduceMotion) requestAnimationFrame(drawField);
+    if (!reduceMotion) fieldRaf = requestAnimationFrame(drawField);
   };
-  requestAnimationFrame(drawField);
+  fieldRaf = requestAnimationFrame(drawField);
 
   // Subtle camera pan following the pointer
   if (!reduceMotion && matchMedia('(pointer: fine)').matches) {
@@ -707,16 +718,19 @@
     cur.setAttribute('aria-hidden', 'true');
     cur.innerHTML = '<span></span>';
     document.body.appendChild(cur);
-    let x = innerWidth / 2, y = innerHeight / 2, tx = x, ty = y;
-    addEventListener('pointermove', (e) => { tx = e.clientX; ty = e.clientY; cur.classList.add('on'); }, { passive: true });
-    document.documentElement.addEventListener('pointerleave', () => cur.classList.remove('on'));
+    let x = innerWidth / 2, y = innerHeight / 2, tx = x, ty = y, followRaf = 0;
+    // only animate while the cursor is catching up, then sleep
     const follow = () => {
       x += (tx - x) * 0.22;
       y += (ty - y) * 0.22;
       cur.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
-      requestAnimationFrame(follow);
+      followRaf = Math.abs(tx - x) + Math.abs(ty - y) > 0.3 ? requestAnimationFrame(follow) : 0;
     };
-    follow();
+    addEventListener('pointermove', (e) => {
+      tx = e.clientX; ty = e.clientY; cur.classList.add('on');
+      if (!followRaf) followRaf = requestAnimationFrame(follow);
+    }, { passive: true });
+    document.documentElement.addEventListener('pointerleave', () => cur.classList.remove('on'));
     document.addEventListener('pointerover', (e) => {
       const clip = e.target.closest('.clip-card');
       const hot = e.target.closest('a, button, select, input, textarea, label, .ruler');
@@ -887,7 +901,8 @@
   };
   splitQuote();
   lightQuote();
-  addEventListener('scroll', lightQuote, { passive: true });
+  let quoteRaf = 0;
+  addEventListener('scroll', () => { if (!quoteRaf) quoteRaf = requestAnimationFrame(() => { quoteRaf = 0; lightQuote(); }); }, { passive: true });
   document.addEventListener('langchange', () => { splitQuote(); lightQuote(); });
 
   /* ---------- Wordmark letters rise toward the pointer ---------- */
