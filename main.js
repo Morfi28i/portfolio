@@ -388,22 +388,75 @@
     ? [{ n: 2, rx: 0.92, ry: 0.5, depth: 200, speed: 0.14 }, { n: 3, rx: 1.12, ry: 0.78, depth: 300, speed: -0.09 }]
     : [{ n: 2, rx: 0.8, ry: 0.66, depth: 260, speed: 0.1 },
        { n: 3, rx: 1.02, ry: 0.92, depth: 380, speed: -0.06 }];
+  // Like Artcraft: every card is drawn on ONE canvas instead of being its own 3D layer.
+  // Each card is pre-rendered once (image, rounded corners, border, shadow, timecode label)
+  // as a sprite, plus a softly blurred copy for when it passes behind; each frame only
+  // stamps those sprites with the same perspective maths CSS used (perspective 900px).
+  const cardCanvas = document.createElement('canvas');
+  cardCanvas.className = 'orbit-canvas';
+  fieldInner.appendChild(cardCanvas);
+  const cctx = cardCanvas.getContext('2d');
+  const DPR = Math.min(devicePixelRatio || 1, 2);
+  const PERSP = 900, SPAD = 60;
   const shots = [];
   let idx = 0;
+  const cssVar = (n) => getComputedStyle(root).getPropertyValue(n).trim();
+  const makeSprite = (img, w, h, tc, blur) => {
+    const cv = document.createElement('canvas');
+    const S = 2;                                   // sprites are drawn at 2x for crispness
+    cv.width = (w + SPAD * 2) * S; cv.height = (h + SPAD * 2) * S;
+    const g = cv.getContext('2d');
+    g.scale(S, S);
+    if (blur) g.filter = 'blur(2px)';
+    const light = root.dataset.theme === 'light' || (!root.dataset.theme && matchMedia('(prefers-color-scheme: light)').matches);
+    // shadow (0 20px 50px)
+    g.save();
+    g.shadowColor = light ? 'rgba(60,40,10,.14)' : 'rgba(0,0,0,.35)';
+    g.shadowBlur = 50; g.shadowOffsetY = 20;
+    g.fillStyle = cssVar('--surface') || '#1b1a17';
+    g.beginPath(); g.roundRect(SPAD, SPAD, w, h, 6); g.fill();
+    g.restore();
+    // image, cropped like object-fit: cover
+    g.save();
+    g.beginPath(); g.roundRect(SPAD, SPAD, w, h, 6); g.clip();
+    if (img.naturalWidth) {
+      const ir = img.naturalWidth / img.naturalHeight, r = w / h;
+      let sw = img.naturalWidth, sh = img.naturalHeight, sx = 0, sy = 0;
+      if (ir > r) { sw = sh * r; sx = (img.naturalWidth - sw) / 2; } else { sh = sw / r; sy = (img.naturalHeight - sh) / 2; }
+      g.drawImage(img, sx, sy, sw, sh, SPAD, SPAD, w, h);
+    }
+    // timecode label (8px mono, bottom-left)
+    g.globalAlpha = 0.8;
+    g.fillStyle = '#fff';
+    g.font = '500 8px "JetBrains Mono", monospace';
+    g.textBaseline = 'bottom';
+    g.fillText(tc.split('').join(String.fromCharCode(8202)), SPAD + 6, SPAD + h - 5);
+    g.restore();
+    // 1px border
+    g.strokeStyle = cssVar('--line') || '#2b2925';
+    g.lineWidth = 1;
+    g.beginPath(); g.roundRect(SPAD + 0.5, SPAD + 0.5, w - 1, h - 1, 6); g.stroke();
+    return cv;
+  };
+  const buildSprites = () => shots.forEach((s) => { s.sprite = makeSprite(s.img, s.w, s.h, s.tc, false); s.spriteFar = makeSprite(s.img, s.w, s.h, s.tc, true); });
   rings.forEach((ring, r) => {
     for (let i = 0; i < ring.n; i++) {
       const [id, ratio] = clips[idx % clips.length];
-      const el = document.createElement('figure');
-      el.className = 'shot';
       const w = (ratio > 1 ? 176 : 98) * (small ? 0.62 : 1) * (1 - r * 0.06);
-      el.style.width = `${w}px`;
-      el.style.height = `${Math.round(w / ratio)}px`;
-      el.dataset.tc = `A${String(++idx).padStart(3, '0')}`;
-      el.innerHTML = `<img src="assets/work/sm/${id}.jpg" alt="" decoding="async">`;
-      fieldInner.appendChild(el);
-      shots.push({ el, ring, a: (i / ring.n) * Math.PI * 2 + r * 0.7, tilt: (Math.random() - 0.5) * 10 });
+      const h = Math.round(w / ratio);
+      const img = new Image();
+      img.decoding = 'async';
+      const s = { img, w, h, tc: `A${String(++idx).padStart(3, '0')}`, ring, a: (i / ring.n) * Math.PI * 2 + r * 0.7, tilt: (Math.random() - 0.5) * 10 };
+      img.onload = () => { s.sprite = makeSprite(img, w, h, s.tc, false); s.spriteFar = makeSprite(img, w, h, s.tc, true); };
+      img.src = `assets/work/sm/${id}.jpg`;
+      s.sprite = makeSprite(img, w, h, s.tc, false);
+      s.spriteFar = s.sprite;
+      shots.push(s);
     }
   });
+  // redraw sprites when the theme changes (shadow/border colours) or fonts arrive
+  new MutationObserver(buildSprites).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+  document.fonts?.ready.then(buildSprites);
 
   let fieldVisible = true, fieldRaf = 0;
   new IntersectionObserver(([e]) => {
@@ -415,8 +468,37 @@
   document.addEventListener('visibilitychange', () => { if (!document.hidden && fieldVisible) runField(); });
 
   let last = performance.now();
-  let W = field.clientWidth / 2, H = field.clientHeight / 2;
-  addEventListener('resize', () => { W = field.clientWidth / 2; H = field.clientHeight / 2; });
+  let W = 0, H = 0;
+  const sizeCards = () => {
+    W = field.clientWidth / 2; H = field.clientHeight / 2;
+    cardCanvas.width = Math.round(W * 2 * DPR); cardCanvas.height = Math.round(H * 2 * DPR);
+  };
+  sizeCards();
+  addEventListener('resize', sizeCards);
+  const drawCards = (dt) => {
+    cctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    cctx.clearRect(0, 0, W * 2, H * 2);
+    for (const s of shots) {
+      if (!reduceMotion) s.a += s.ring.speed * dt;
+      const sin = Math.sin(s.a), cos = Math.cos(s.a);
+      s.z = sin * s.ring.depth;                      // lower half comes forward, upper half recedes
+      s.front = (sin + 1) / 2;                       // 0 at the back, 1 at the front
+      s.x = cos * s.ring.rx * W; s.y = sin * s.ring.ry * H; s.ry = -cos * 18;
+    }
+    // back to front, like the old z-index stacking
+    [...shots].sort((p, q) => p.z - q.z).forEach((s) => {
+      const k = PERSP / (PERSP - s.z);               // perspective scale for translateZ
+      const sprite = s.front < 0.35 ? s.spriteFar : s.sprite;
+      if (!sprite) return;
+      cctx.save();
+      cctx.globalAlpha = 0.3 + s.front * 0.7;
+      cctx.translate(W + s.x * k, H + s.y * k);
+      cctx.scale(k * Math.cos((s.ry * Math.PI) / 180), k);   // rotateY reads as a horizontal squash
+      cctx.rotate((s.tilt * Math.PI) / 180);
+      cctx.drawImage(sprite, -(s.w / 2 + SPAD), -(s.h / 2 + SPAD), s.w + SPAD * 2, s.h + SPAD * 2);
+      cctx.restore();
+    });
+  };
   const halfRate = root.classList.contains('lite');   // modest devices: move cards every other frame
   let odd = false;
   const drawField = (now) => {
@@ -428,21 +510,7 @@
     last = now;
     tick();
     drawRings(now);
-    for (const s of shots) {
-      if (!reduceMotion) s.a += s.ring.speed * dt;
-      const sin = Math.sin(s.a), cos = Math.cos(s.a);
-      const x = cos * s.ring.rx * W;
-      const y = sin * s.ring.ry * H;
-      const z = sin * s.ring.depth;                  // lower half comes forward, upper half recedes
-      const front = (sin + 1) / 2;                   // 0 at the back, 1 at the front
-      s.el.style.opacity = (0.3 + front * 0.7).toFixed(2);
-      const zi = Math.round(front * 20);
-      if (zi !== s.zi) { s.zi = zi; s.el.style.zIndex = zi; }
-      const far = front < 0.35;
-      if (far !== s.far) { s.far = far; s.el.classList.toggle('far', far); }
-      s.el.style.transform =
-        `translate(-50%, -50%) translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, ${z.toFixed(1)}px) rotateY(${(-cos * 18).toFixed(1)}deg) rotate(${s.tilt.toFixed(1)}deg)`;
-    }
+    drawCards(dt);
     if (!reduceMotion) fieldRaf = requestAnimationFrame(drawField);
   };
   fieldRaf = requestAnimationFrame(drawField);
