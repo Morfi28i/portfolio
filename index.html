@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,600..800&family=Instrument+Serif:ital@1&family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=14">
+  <link rel="stylesheet" href="styles.css?v=16">
 
   <!-- Set theme before paint to avoid a flash -->
   <script>
@@ -110,14 +110,7 @@
 
       <!-- Camera viewfinder overlay -->
       <div class="vf" aria-hidden="true">
-        <div class="rings">
-          <svg class="ring" style="--dur:90s" viewBox="0 0 200 200"><circle class="ring-ticks" cx="100" cy="100" r="96"/></svg>
-          <svg class="ring" style="--dur:24s" viewBox="0 0 200 200"><circle class="ring-arc" cx="100" cy="100" r="88"/></svg>
-          <svg class="ring rev" style="--dur:60s" viewBox="0 0 200 200"><circle class="ring-thin" cx="100" cy="100" r="80"/></svg>
-          <svg class="ring" style="--dur:38s" viewBox="0 0 200 200"><circle class="orbit o1" cx="100" cy="100" r="135"/></svg>
-          <svg class="ring rev" style="--dur:52s" viewBox="0 0 200 200"><circle class="orbit o2" cx="100" cy="100" r="175"/></svg>
-          <svg class="ring" style="--dur:70s" viewBox="0 0 200 200"><circle class="orbit o3" cx="100" cy="100" r="220"/></svg>
-        </div>
+        <canvas class="rings-canvas" id="rings"></canvas>
         <span class="vf-corner tl"></span><span class="vf-corner tr"></span>
         <span class="vf-corner bl"></span><span class="vf-corner br"></span>
         <span class="vf-hud vf-tl mono"><span class="rec"><i></i>REC</span><span id="timecode" dir="ltr">00:00:00:00</span></span>
@@ -558,7 +551,7 @@
     <div class="player-frame" id="playerFrame"></div>
   </dialog>
 
-  <script src="i18n.js?v=14"></script>
-  <script src="main.js?v=14"></script>
+  <script src="i18n.js?v=16"></script>
+  <script src="main.js?v=16"></script>
 </body>
 </html>

@@ -316,6 +316,63 @@
   };
   tick();
 
+
+  /* ---------- Hero rings, drawn on one canvas ---------- */
+  // Same strokes, dashes, colours and speeds as the old SVG rings (units are a 200×200 box).
+  const ringCanvas = document.getElementById('rings');
+  const rctx = ringCanvas.getContext('2d');
+  const RINGS = [
+    { r: 96,  w: 3,   dash: [0.6, 4.4], color: 'line', alpha: 1,   period: 90, dir: 1 },
+    { r: 88,  w: 0.5, dash: [90, 463],  color: 'accent', alpha: 0.8, period: 24, dir: 1, cap: 'round' },
+    { r: 80,  w: 0.3, dash: [2, 6],     color: 'teal', alpha: 0.4, period: 60, dir: -1 },
+    { r: 135, w: 0.35, dash: [260, 590], color: 'accent', alpha: 0.85, period: 38, dir: 1 },
+    { r: 175, w: 0.35, dash: [340, 760], color: 'teal', alpha: 0.85, period: 52, dir: -1 },
+    { r: 220, w: 0.35, dash: [220, 1160], color: 'rec', alpha: 0.6, period: 70, dir: 1 },
+  ];
+  let ringBox = 0, ringColors = {}, cw = 0, ch = 0;
+  const sizeRings = () => {
+    const vmin = Math.min(innerWidth, innerHeight);
+    ringBox = Math.min(vmin * 0.86, 760);            // the old SVG box size
+    // the canvas only covers the viewfinder area: rings beyond it were never visible
+    cw = ringCanvas.clientWidth; ch = ringCanvas.clientHeight;
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    ringCanvas.width = Math.round(cw * dpr);
+    ringCanvas.height = Math.round(ch * dpr);
+    rctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  };
+  const readRingColors = () => {
+    const cs = getComputedStyle(root);
+    ringColors = { line: cs.getPropertyValue('--line').trim(), accent: cs.getPropertyValue('--accent').trim(),
+      teal: cs.getPropertyValue('--teal').trim(), rec: cs.getPropertyValue('--rec').trim() };
+  };
+  const drawRings = (now) => {
+    const k = ringBox / 200;
+    rctx.clearRect(0, 0, cw, ch);
+    for (const g of RINGS) {
+      const ang = reduceMotion ? 0 : ((now / 1000) / g.period) * Math.PI * 2 * g.dir;
+      rctx.save();
+      rctx.translate(cw / 2, ch / 2);
+      rctx.rotate(ang);
+      rctx.globalAlpha = g.alpha;
+      rctx.strokeStyle = ringColors[g.color];
+      rctx.lineWidth = g.w * k;
+      rctx.lineCap = g.cap || 'butt';
+      rctx.setLineDash(g.dash.map((d) => d * k));
+      rctx.beginPath();
+      rctx.arc(0, 0, g.r * k, 0, Math.PI * 2);
+      rctx.stroke();
+      rctx.restore();
+    }
+  };
+  sizeRings();
+  readRingColors();
+  drawRings(performance.now());
+  addEventListener('resize', () => { sizeRings(); drawRings(performance.now()); });
+  // theme / LUT changes recolour the rings
+  new MutationObserver(() => { readRingColors(); drawRings(performance.now()); })
+    .observe(root, { attributes: true, attributeFilter: ['data-theme', 'data-lut'] });
+  matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => { readRingColors(); drawRings(performance.now()); });
+
   /* ---------- Hero footage orbit ---------- */
   // The person's clips circle the wordmark on tilted rings, like footage orbiting the lens.
   const field = document.getElementById('field');
@@ -367,6 +424,7 @@
     const dt = Math.min((now - last) / 1000, 0.05);
     last = now;
     tick();
+    drawRings(now);
     for (const s of shots) {
       if (!reduceMotion) s.a += s.ring.speed * dt;
       const sin = Math.sin(s.a), cos = Math.cos(s.a);

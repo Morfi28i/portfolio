@@ -232,10 +232,8 @@ h1, h2, h3, p { margin: 0; }
 .battery i { width: 4px; height: 7px; background: currentColor; }
 .battery i:last-child { opacity: .25; }
 
-.rings { position: absolute; left: 50%; top: 50%; width: min(86vmin, 760px); aspect-ratio: 1; translate: -50% -50%; }
-/* each ring spins as its own layer, so the GPU turns it instead of repainting the SVG */
-.ring { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; fill: none; animation: spin var(--dur) linear infinite; will-change: transform; }
-.ring.rev { animation-direction: reverse; }
+/* the six focus/orbit rings are drawn on one canvas (one small GPU layer instead of six huge ones) */
+.rings-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .ring-ticks { stroke: var(--line); stroke-width: 3; stroke-dasharray: .6 4.4; }
 .ring-arc {
   stroke: var(--accent); stroke-width: .5; stroke-dasharray: 90 463; stroke-linecap: round; opacity: .8;
