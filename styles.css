@@ -1090,9 +1090,6 @@ main { counter-reset: sec; }
   -webkit-mask: radial-gradient(closest-side, #000 55%, transparent); mask: radial-gradient(closest-side, #000 55%, transparent);
   background: none;
 }
-.lite .hero-center::before {
-  backdrop-filter: none; -webkit-backdrop-filter: none; -webkit-mask: none; mask: none;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--bg) 82%, transparent) 45%, color-mix(in srgb, var(--bg) 45%, transparent) 75%, transparent);
-}
+
 /* depth blur for cards on the far side of the orbit, switched as they pass (not every frame) */
 .shot.far { filter: blur(2px); }

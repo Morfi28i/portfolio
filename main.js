@@ -23,6 +23,19 @@
     return out.reverse();
   }
 
+  /* ---------- Page size, measured when it changes (never during scroll) ---------- */
+  const page = { h: 1, max: 1, vh: innerHeight };
+  const measurePage = () => {
+    page.h = document.documentElement.scrollHeight;
+    page.vh = innerHeight;
+    page.max = Math.max(1, page.h - page.vh);
+    document.dispatchEvent(new Event('pagesize'));
+  };
+  measurePage();
+  addEventListener('resize', measurePage);
+  addEventListener('load', measurePage);
+  new ResizeObserver(() => measurePage()).observe(document.body);
+
   /* ---------- Language ---------- */
   let lang = 'en';
   const t = (key) => translations[lang]?.[key] ?? translations.en[key] ?? '';
@@ -124,7 +137,7 @@
   const odo = document.getElementById('odo');
   const STEP = 40;   // px of scroll per second, for the section bars' timecodes
   const fmt = (sec) => `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
-  const maxScroll = () => Math.max(1, document.documentElement.scrollHeight - innerHeight);
+  const maxScroll = () => page.max;
   const PAD = 18, SPREAD = 24;   // spacing per 1% when not zoomed out
   let ticks = [], rClips = [], marks = [], open = false;
   const cur = { s: SPREAD, y: PAD, head: PAD };
@@ -189,7 +202,7 @@
       el.style.transform = `translateY(${(cur.y + a * 100 * cur.s).toFixed(1)}px) scaleY(${Math.max(4, (b - a) * 100 * cur.s - 3).toFixed(1)})`;
       el.style.height = '1px';
     });
-    const vA = scrollY / document.documentElement.scrollHeight, vB = (scrollY + innerHeight) / document.documentElement.scrollHeight;
+    const vA = scrollY / page.h, vB = (scrollY + page.vh) / page.h;
     rulerView.style.transform = `translateY(${(cur.y + vA * 100 * cur.s).toFixed(1)}px) scaleY(${Math.max(2, (vB - vA) * 100 * cur.s).toFixed(1)})`;
     rulerHead.style.transform = `translateY(${cur.head.toFixed(1)}px)`;
     const here = marks.findIndex((m) => tg.p >= m.a && tg.p < m.b + 0.001);
@@ -230,6 +243,7 @@
   addEventListener('load', refreshRuler);
   document.fonts?.ready.then(refreshRuler);
   document.addEventListener('langchange', refreshRuler);
+  document.addEventListener('pagesize', refreshRuler);
   refreshRuler();
   addEventListener('scroll', moveRuler, { passive: true });
 
@@ -257,8 +271,7 @@
   /* ---------- Header state + scroll progress ---------- */
   const bar = document.querySelector('.progress span');
   const onScroll = () => {
-    const max = document.documentElement.scrollHeight - innerHeight;
-    bar.style.setProperty('--p', max > 0 ? (scrollY / max).toFixed(4) : 0);
+    bar.style.setProperty('--p', (Math.min(1, scrollY / page.max)).toFixed(4));
   };
   addEventListener('scroll', onScroll, { passive: true });
   onScroll();
@@ -327,7 +340,7 @@
       el.style.width = `${w}px`;
       el.style.height = `${Math.round(w / ratio)}px`;
       el.dataset.tc = `A${String(++idx).padStart(3, '0')}`;
-      el.innerHTML = `<img src="assets/work/${id}.jpg" alt="" decoding="async">`;
+      el.innerHTML = `<img src="assets/work/sm/${id}.jpg" alt="" decoding="async">`;
       fieldInner.appendChild(el);
       shots.push({ el, ring, a: (i / ring.n) * Math.PI * 2 + r * 0.7, tilt: (Math.random() - 0.5) * 10 });
     }
@@ -345,9 +358,12 @@
   let last = performance.now();
   let W = field.clientWidth / 2, H = field.clientHeight / 2;
   addEventListener('resize', () => { W = field.clientWidth / 2; H = field.clientHeight / 2; });
+  const halfRate = root.classList.contains('lite');   // modest devices: move cards every other frame
+  let odd = false;
   const drawField = (now) => {
     fieldRaf = 0;
     if (!fieldVisible || document.hidden) return;
+    if (halfRate && (odd = !odd)) { fieldRaf = requestAnimationFrame(drawField); return; }
     const dt = Math.min((now - last) / 1000, 0.05);
     last = now;
     tick();
@@ -532,7 +548,19 @@
         it.yAct = it.yTop + ACT;
         it.yBot = vh - 40 - (n - 1 - i) * GAP;
         it.right = right;
-        if (it.hero) return;
+        it.pageTop = it.el.getBoundingClientRect().top + scrollY;
+        if (it.hero) {
+          // where each wordmark letter starts, from layout boxes (unaffected by the intro animation)
+          const box = wm.getBoundingClientRect();
+          const chs = [...wm.querySelectorAll('.ch')];
+          const whole = chs.length !== it.letters.length;
+          it.big = parseFloat(getComputedStyle(wm).fontSize) / BASE;
+          it.fromY = box.top + scrollY + box.height / 2;
+          it.from = it.letters.map((_, k) => (whole
+            ? box.left + (it.adv[k] / it.W) * box.width
+            : box.left + (chs[k].offsetLeft - wm.offsetLeft) + chs[k].offsetWidth / 2));
+          return;
+        }
         // Path for the leading edge of the word: bottom slot → ruler → up → curve → active slot
         const pts = [[right - 3000, it.yBot], [right, it.yBot]];
         const quad = (p0, c, p1) => { for (let k = 1; k <= 10; k++) { const u = k / 10; pts.push([
@@ -600,7 +628,7 @@
       if (!desk.matches || !items.length) { wm.style.visibility = ''; return; }
       const vh = innerHeight, rtl = false, n = items.length;
       const enter = items.map((it, i) => (i === 0 ? 1
-        : clamp((vh - it.el.getBoundingClientRect().top) / (vh - 140))));
+        : clamp((vh - (it.pageTop - scrollY)) / (vh - 140))));
 
       items.forEach((it, i) => {
         const exit = i + 1 < n ? enter[i + 1] : 0;
@@ -611,8 +639,7 @@
           const p = clamp(exit * 1.6);
           const flying = p > 0.001;
           wm.style.visibility = flying ? 'hidden' : '';
-          const chs = wm.querySelectorAll('.ch');
-          const big = parseFloat(getComputedStyle(wm).fontSize) / BASE;
+          const big = it.big;
           it.letters.forEach((s, k) => {
             if (!flying) { s.style.opacity = 0; return; }
             // Each letter leaves on its own beat (right-most first), fans out mid-flight,
@@ -621,11 +648,9 @@
             const pk = ease(raw);
             const lift = Math.sin(Math.PI * raw);
             const off = k - (L - 1) / 2;
-            const whole = chs.length !== L;
-            const r = (whole ? chs[0] : chs[k]).getBoundingClientRect();
-            const fromX = whole ? r.left + (it.adv[k] / it.W) * r.width : r.left + r.width / 2;
+            const fromX = it.from[k];
             // the wordmark scrolls away under the header, so letters peel off and stay on screen
-            const fromY = Math.max(r.top + r.height / 2, 150);
+            const fromY = Math.max(it.fromY - scrollY, 150);
             const toX = it.right - (it.W - it.adv[k]) * SMALL;
             place(s, lerp(fromX, toX, pk) + off * lift * 90, lerp(fromY, it.yTop, pk) + lift * 50 * (1 + Math.abs(off) * 0.35),
               off * lift * 8, lerp(big, SMALL, pk), rtl);
@@ -687,6 +712,7 @@
     addEventListener('resize', () => { layout(); request(); });
     desk.addEventListener('change', () => { layout(); request(); });
     document.addEventListener('langchange', () => { build(); request(); });
+    document.addEventListener('pagesize', () => { layout(); request(); });
     // Fonts change letter widths, so re-measure once they're in
     document.fonts?.ready.then(() => { layout(); request(); });
     build();
@@ -748,13 +774,18 @@
   ms.innerHTML = '<span class="mscroll-thumb"></span>';
   document.body.appendChild(ms);
   const thumb = ms.firstElementChild;
-  const sizeThumb = () => {
-    const track = ms.clientHeight;
-    const h = Math.max(48, track * (innerHeight / document.documentElement.scrollHeight));
-    thumb.style.height = `${h}px`;
-    const p = Math.min(1, scrollY / Math.max(1, document.documentElement.scrollHeight - innerHeight));
-    thumb.style.transform = `translateY(${(p * (track - h)).toFixed(1)}px)`;
+  let track = 0, thumbH = 48;
+  const measureThumb = () => {
+    track = ms.clientHeight;
+    thumbH = Math.max(48, track * (page.vh / page.h));
+    thumb.style.height = `${thumbH}px`;
   };
+  const sizeThumb = () => {
+    const p = Math.min(1, scrollY / page.max);
+    thumb.style.transform = `translateY(${(p * (track - thumbH)).toFixed(1)}px)`;
+  };
+  document.addEventListener('pagesize', () => { measureThumb(); sizeThumb(); });
+  measureThumb();
   let drag = null;
   thumb.addEventListener('pointerdown', (e) => {
     drag = { y: e.clientY, s: scrollY };
@@ -763,15 +794,12 @@
   });
   thumb.addEventListener('pointermove', (e) => {
     if (!drag) return;
-    const track = ms.clientHeight - thumb.offsetHeight;
-    const max = document.documentElement.scrollHeight - innerHeight;
-    scrollTo(0, drag.s + ((e.clientY - drag.y) / track) * max);
+    scrollTo(0, drag.s + ((e.clientY - drag.y) / Math.max(1, track - thumbH)) * page.max);
   });
   const endDrag = () => { drag = null; ms.classList.remove('dragging'); };
   thumb.addEventListener('pointerup', endDrag);
   thumb.addEventListener('pointercancel', endDrag);
   addEventListener('scroll', sizeThumb, { passive: true });
-  addEventListener('resize', sizeThumb);
   addEventListener('load', sizeThumb);
   sizeThumb();
 
