@@ -108,6 +108,7 @@
 
   /* ---------- Intro ---------- */
   const intro = document.getElementById('intro');
+  if (root.classList.contains('off-intro')) root.classList.remove('intro-on');
   if (root.classList.contains('intro-on')) {
     // The intro opens on the hero, so don't restore an old scroll position under it
     if (!location.hash) { history.scrollRestoration = 'manual'; scrollTo(0, 0); }
@@ -420,6 +421,7 @@
   const drawField = (now) => {
     fieldRaf = 0;
     if (!fieldVisible || document.hidden) return;
+    if (root.classList.contains('off-all') || (root.classList.contains('off-orbit') && root.classList.contains('off-rings'))) return;
     if (halfRate && (odd = !odd)) { fieldRaf = requestAnimationFrame(drawField); return; }
     const dt = Math.min((now - last) / 1000, 0.05);
     last = now;
