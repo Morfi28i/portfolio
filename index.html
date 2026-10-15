@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Morfi — Motion Designer & Video Editor</title>
+  <meta name="description" content="Morfi is a motion designer and video editor based in Egypt, turning raw footage into stories that move.">
+  <meta name="theme-color" content="#0d0c0b">
+  <meta property="og:title" content="Morfi — Motion Designer & Video Editor">
+  <meta property="og:description" content="Every frame is a cut, every cut tells a story.">
+  <meta property="og:image" content="https://morfi28i.github.io/portfolio/assets/morfi.jpg">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,600..800&family=Instrument+Serif:ital@1&family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=7">
+
+  <!-- Set theme before paint to avoid a flash -->
+  <script>
+    document.documentElement.classList.add('js');
+    try {
+      // no intro when the page reloads itself after a language switch
+      const relang = sessionStorage.getItem('morfi-relang');
+      if (!relang && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('intro-on');
+      const t = localStorage.getItem('morfi-theme');
+      if (t) document.documentElement.dataset.theme = t;
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <!-- Intro: a quick camera "roll" before the page cuts in -->
+  <div class="intro" id="intro" aria-hidden="true">
+    <div class="intro-inner">
+      <span class="rec"><i></i>REC</span>
+      <span class="intro-tc" id="introTc">00:00:00:00</span>
+    </div>
+    <span class="intro-bar"><i></i></span>
+  </div>
+
+  <!-- Side timeline ruler + travelling section titles -->
+  <div class="ruler" aria-hidden="true">
+    <div class="ruler-track" id="rulerTrack"></div>
+    <span class="ruler-head"><b id="rulerTc">00:00</b></span>
+    <span class="ruler-hover" id="rulerHover"><b></b></span>
+  </div>
+<nav class="train" id="train" aria-label="Sections"></nav>
+  <div class="progress" aria-hidden="true"><span></span></div>
+
+  <header class="header">
+    <div class="bar">
+      <a href="#top" class="hcell logo" aria-label="Morphine — home">
+        <span class="logo-dot" aria-hidden="true"></span>Morphine
+      </a>
+
+      <nav class="nav" aria-label="Primary">
+        <a href="#work" class="hud"><span data-i18n="nav.work">Work</span></a>
+        <a href="#about" class="hud"><span data-i18n="nav.about">About</span></a>
+        <a href="#services" class="hud"><span data-i18n="nav.services">Services</span></a>
+        <a href="#contact" class="hud"><span data-i18n="nav.contact">Contact</span></a>
+      </nav>
+
+      <div class="bar-end">
+        <div class="lang lang-bar" role="group" aria-label="Language">
+          <button type="button" class="hud" data-lang="en"><span>EN</span></button>
+          <button type="button" class="hud" data-lang="ar"><span>ع</span></button>
+          <button type="button" class="hud" data-lang="es"><span>ES</span></button>
+        </div>
+        <button type="button" class="hcell cell-icon" id="themeBtn" aria-label="Toggle light / dark">
+          <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
+          <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></svg>
+        </button>
+        <a href="#contact" class="hcell cta" data-i18n="hero.cta2">Let's Talk</a>
+        <button type="button" class="hcell cell-icon menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false" aria-controls="mobileNav">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+
+    <nav class="mobile-nav" id="mobileNav" aria-label="Mobile">
+      <a href="#work" class="hud"><span data-i18n="nav.work">Work</span></a>
+      <a href="#about" class="hud"><span data-i18n="nav.about">About</span></a>
+      <a href="#services" class="hud"><span data-i18n="nav.services">Services</span></a>
+      <a href="#contact" class="hud"><span data-i18n="nav.contact">Contact</span></a>
+      <a href="#contact" class="m-cta" data-i18n="hero.cta2">Let's Talk</a>
+      <div class="lang m-lang" role="group" aria-label="Language">
+        <button type="button" data-lang="en">English</button>
+        <button type="button" data-lang="ar">العربية</button>
+        <button type="button" data-lang="es">Español</button>
+      </div>
+    </nav>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero" id="hero">
+      <!-- Footage flying toward the lens (cards injected by main.js) -->
+      <div class="field" id="field" aria-hidden="true"><div class="field-inner" id="fieldInner"></div></div>
+
+      <!-- Camera viewfinder overlay -->
+      <div class="vf" aria-hidden="true">
+        <svg class="focus-ring" viewBox="0 0 200 200">
+          <circle class="ring-ticks" cx="100" cy="100" r="96"/>
+          <circle class="ring-arc" cx="100" cy="100" r="88"/>
+          <circle class="ring-thin" cx="100" cy="100" r="80"/>
+          <circle class="orbit o1" cx="100" cy="100" r="135"/>
+          <circle class="orbit o2" cx="100" cy="100" r="175"/>
+          <circle class="orbit o3" cx="100" cy="100" r="220"/>
+        </svg>
+        <span class="vf-corner tl"></span><span class="vf-corner tr"></span>
+        <span class="vf-corner bl"></span><span class="vf-corner br"></span>
+        <span class="vf-hud vf-tl mono"><span class="rec"><i></i>REC</span><span id="timecode" dir="ltr">00:00:00:00</span></span>
+        <span class="vf-hud vf-tr mono" dir="ltr">4K · 25P · ISO 800</span>
+        <span class="vf-hud vf-bl mono" dir="ltr">ƒ/2.8 · 1/50 · 35MM</span>
+        <span class="vf-hud vf-br mono" dir="ltr"><span class="battery"><i></i><i></i><i></i><i></i></span></span>
+      </div>
+
+      <div class="hero-center">
+        <p class="hero-label mono" data-i18n="hero.label">Motion Designer & Video Editor</p>
+        <h1 class="wordmark" id="wordmark" data-i18n="hero.title">MORFI</h1>
+        <p class="hero-tag">
+          <span data-i18n="hero.tag1">Raw footage in,</span>
+          <em data-i18n="hero.tag2">stories out.</em>
+        </p>
+        <p class="hero-desc" data-i18n="hero.desc">Motion designer and video editor transforming raw footage into compelling narratives. Every frame is a cut, every cut tells a story.</p>
+        <div class="hero-ctas">
+          <a href="#work" class="hbtn hbtn-solid">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            <span data-i18n="hero.cta1">View My Work</span>
+          </a>
+          <a href="#contact" class="hbtn" data-i18n="hero.cta2">Let's Talk</a>
+        </div>
+        <p class="hero-meta mono">
+          <span><b data-count="2">0</b>+ <span data-i18n="hero.stat1">Years Experience</span></span>
+          <span class="sep" aria-hidden="true">·</span>
+          <span><b data-count="50">0</b>+ <span data-i18n="hero.stat2">Projects Done</span></span>
+          <span class="sep" aria-hidden="true">·</span>
+          <span><b data-count="30">0</b>+ <span data-i18n="hero.stat3">Happy Clients</span></span>
+        </p>
+      </div>
+    </section>
+
+    <!-- Film strip ticker -->
+    <div class="reel" aria-label="Skills">
+      <div class="reel-track">
+        <ul class="reel-group">
+          <li data-i18n="skills.video">Video Editing</li>
+          <li data-i18n="skills.motion">Motion Graphics</li>
+          <li data-i18n="skills.color">Color Grading</li>
+          <li data-i18n="skills.sound">Sound Design</li>
+          <li data-i18n="skills.compositing">Compositing</li>
+          <li data-i18n="skills.social">Social Media Content</li>
+          <li data-i18n="services.s6.title">Motion Design Instruction</li>
+        </ul>
+        <ul class="reel-group" aria-hidden="true">
+          <li data-i18n="skills.video">Video Editing</li>
+          <li data-i18n="skills.motion">Motion Graphics</li>
+          <li data-i18n="skills.color">Color Grading</li>
+          <li data-i18n="skills.sound">Sound Design</li>
+          <li data-i18n="skills.compositing">Compositing</li>
+          <li data-i18n="skills.social">Social Media Content</li>
+          <li data-i18n="services.s6.title">Motion Design Instruction</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- WORK -->
+    <section class="sec" id="work">
+      <div class="frame">
+        <div class="sbar mono" data-track="V1" data-color="a">
+          <span class="trk">V1</span>
+          <span class="sbar-title"><b>01</b> / <span data-i18n="work.label">Selected Work</span></span>
+          <span class="sbar-tc" dir="ltr"></span>
+          <span class="sbar-meta" data-i18n="work.meta">5 clips · tap to play</span>
+        </div>
+        <header class="shead reveal">
+          <h2><span data-i18n="work.t1">Frames</span> <em data-i18n="work.t2">that speak.</em></h2>
+          <p data-i18n="work.desc">A curated selection of my best video editing and motion design projects.</p>
+        </header>
+
+        <div class="work-wrap">
+          <div class="work-grid">
+          <button type="button" class="clip-card reveal" data-video="6kj0zz" data-ratio="9/16">
+            <span class="clip-media">
+              <span class="clip-ar mono" aria-hidden="true">9:16</span>
+              <img src="assets/work/6kj0zz.jpg" alt="" width="720" height="1280" loading="lazy" decoding="async">
+              <span class="clip-rec mono" aria-hidden="true"><i></i>REC</span>
+              <span class="play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+              <span class="clip-no mono">CLIP 01</span>
+              <span class="clip-bar" aria-hidden="true"><i></i></span>
+            </span>
+            <span class="clip-info">
+              <span class="clip-cat mono" data-i18n="videos.v1.cat">Brand Film</span>
+              <span class="clip-title" data-i18n="videos.v1.title">Commitment</span>
+              <span class="clip-desc" data-i18n="videos.v1.desc">A story-driven brand piece built around dedication and follow-through.</span>
+            </span>
+          </button>
+          <button type="button" class="clip-card reveal" data-video="19tkx7" data-ratio="9/16">
+            <span class="clip-media">
+              <span class="clip-ar mono" aria-hidden="true">9:16</span>
+              <img src="assets/work/19tkx7.jpg" alt="" width="720" height="1280" loading="lazy" decoding="async">
+              <span class="clip-rec mono" aria-hidden="true"><i></i>REC</span>
+              <span class="play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+              <span class="clip-no mono">CLIP 02</span>
+              <span class="clip-bar" aria-hidden="true"><i></i></span>
+            </span>
+            <span class="clip-info">
+              <span class="clip-cat mono" data-i18n="videos.v2.cat">Commercial</span>
+              <span class="clip-title" data-i18n="videos.v2.title">Don't Assume the Worst</span>
+              <span class="clip-desc" data-i18n="videos.v2.desc">A short piece about not judging too quickly — things aren't always what they first seem.</span>
+            </span>
+          </button>
+          <button type="button" class="clip-card reveal" data-video="na6ruu" data-ratio="9/16">
+            <span class="clip-media">
+              <span class="clip-ar mono" aria-hidden="true">9:16</span>
+              <img src="assets/work/na6ruu.jpg" alt="" width="720" height="1280" loading="lazy" decoding="async">
+              <span class="clip-rec mono" aria-hidden="true"><i></i>REC</span>
+              <span class="play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+              <span class="clip-no mono">CLIP 03</span>
+              <span class="clip-bar" aria-hidden="true"><i></i></span>
+            </span>
+            <span class="clip-info">
+              <span class="clip-cat mono" data-i18n="videos.v3.cat">Motion Graphics</span>
+              <span class="clip-title" data-i18n="videos.v3.title">Seamless Movement</span>
+              <span class="clip-desc" data-i18n="videos.v3.desc">Fluid, seamless transitions that keep the motion feeling effortless.</span>
+            </span>
+          </button>
+          <button type="button" class="clip-card reveal" data-video="crf0gr" data-ratio="9/16">
+            <span class="clip-media">
+              <span class="clip-ar mono" aria-hidden="true">9:16</span>
+              <img src="assets/work/crf0gr.jpg" alt="" width="720" height="1280" loading="lazy" decoding="async">
+              <span class="clip-rec mono" aria-hidden="true"><i></i>REC</span>
+              <span class="play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+              <span class="clip-no mono">CLIP 04</span>
+              <span class="clip-bar" aria-hidden="true"><i></i></span>
+            </span>
+            <span class="clip-info">
+              <span class="clip-cat mono" data-i18n="videos.v4.cat">Motion Graphics</span>
+              <span class="clip-title" data-i18n="videos.v4.title">Save Your Client</span>
+              <span class="clip-desc" data-i18n="videos.v4.desc">Client-focused motion piece built to convert and captivate your audience.</span>
+            </span>
+          </button>
+          <button type="button" class="clip-card clip-wide reveal" data-video="lq2gll" data-ratio="16/9">
+            <span class="clip-media">
+              <span class="clip-ar mono" aria-hidden="true">16:9</span>
+              <img src="assets/work/lq2gll.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+              <span class="clip-rec mono" aria-hidden="true"><i></i>REC</span>
+              <span class="play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+              <span class="clip-no mono">CLIP 05</span>
+              <span class="clip-bar" aria-hidden="true"><i></i></span>
+            </span>
+            <span class="clip-info">
+              <span class="clip-cat mono" data-i18n="videos.v5.cat">Event Coverage</span>
+              <span class="clip-title" data-i18n="videos.v5.title">Behind the Scenes</span>
+              <span class="clip-desc" data-i18n="videos.v5.desc">Raw, authentic footage capturing the real story behind the production.</span>
+            </span>
+          </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="sec" id="about">
+      <div class="frame">
+        <div class="sbar mono" data-track="V2" data-color="b">
+          <span class="trk">V2</span>
+          <span class="sbar-title"><b>02</b> / <span data-i18n="about.label">Who I Am</span></span>
+          <span class="sbar-tc" dir="ltr"></span>
+          <span class="sbar-meta" data-i18n="hero.location">Egypt — Worldwide</span>
+        </div>
+        <header class="shead reveal">
+          <h2><span data-i18n="about.t1">The editor</span> <em data-i18n="about.t2">behind the cuts.</em></h2>
+          <p data-i18n="about.desc">From timeline to final render, I bring precision and creativity to every project.</p>
+        </header>
+
+        <div class="grid grid-about">
+          <figure class="cell about-photo reveal">
+            <span class="strip mono"><span data-i18n="about.portrait">Portrait</span><span dir="ltr">MORFI_PORTRAIT.RAW</span></span>
+            <img src="assets/morfi.jpg" alt="Portrait of Morfi" width="746" height="1000" loading="lazy" decoding="async">
+          </figure>
+          <div class="cell about-text reveal">
+            <span class="strip mono"><span data-i18n="about.bio">Bio</span><span>02</span></span>
+            <div class="cell-body">
+              <p class="lead" data-i18n="about.p1">I'm a motion designer and video editor based in Egypt, passionate about transforming ideas into visually stunning stories.</p>
+              <blockquote class="quote" data-i18n="about.quote">I'm not just cutting and editing videos — I'm crafting evolution with the client.</blockquote>
+              <p data-i18n="about.p2">My workflow is built on flexibility and compatibility.</p>
+            </div>
+          </div>
+        </div>
+
+        <ul class="grid grid-skills">
+          <li class="cell reveal"><span class="mono k">A</span><span data-i18n="skills.video">Video Editing</span></li>
+          <li class="cell reveal"><span class="mono k">B</span><span data-i18n="skills.motion">Motion Graphics</span></li>
+          <li class="cell reveal"><span class="mono k">C</span><span data-i18n="skills.color">Color Grading</span></li>
+          <li class="cell reveal"><span class="mono k">D</span><span data-i18n="skills.sound">Sound Design</span></li>
+          <li class="cell reveal"><span class="mono k">E</span><span data-i18n="skills.compositing">Compositing</span></li>
+          <li class="cell reveal"><span class="mono k">F</span><span data-i18n="skills.social">Social Media Content</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- SERVICES -->
+    <section class="sec" id="services">
+      <div class="frame">
+        <div class="sbar mono" data-track="V3" data-color="a">
+          <span class="trk">V3</span>
+          <span class="sbar-title"><b>03</b> / <span data-i18n="services.label">What I Do</span></span>
+          <span class="sbar-tc" dir="ltr"></span>
+          <span class="sbar-meta" data-i18n="services.meta">Full post-production</span>
+        </div>
+        <header class="shead reveal">
+          <h2><span data-i18n="services.t1">Services</span> <em data-i18n="services.t2">I offer.</em></h2>
+          <p data-i18n="services.desc">From raw footage to final delivery, I cover the full post-production spectrum.</p>
+        </header>
+
+        <div class="grid grid-services">
+          <article class="cell svc reveal"><span class="strip mono"><span data-i18n="services.tag">Service</span><span>01</span></span><div class="cell-body"><svg class="svc-ico" viewBox="0 0 32 32" aria-hidden="true"><rect pathLength="100" x="3" y="11" width="11.5" height="10" rx="1.5"/><rect pathLength="100" x="17.5" y="11" width="11.5" height="10" rx="1.5"/><path pathLength="100" d="M16 5v22"/><path pathLength="100" d="M13.5 5h5"/></svg><h3 data-i18n="services.s1.title">Video Editing</h3><p data-i18n="services.s1.desc"></p></div></article>
+          <article class="cell svc reveal"><span class="strip mono"><span data-i18n="services.tag">Service</span><span>02</span></span><div class="cell-body"><svg class="svc-ico" viewBox="0 0 32 32" aria-hidden="true"><path pathLength="100" d="M5 24C13 24 12 8 27 8"/><path pathLength="100" d="M5 21l3 3-3 3-3-3z"/><path pathLength="100" d="M27 5l3 3-3 3-3-3z"/></svg><h3 data-i18n="services.s2.title">Motion Graphics</h3><p data-i18n="services.s2.desc"></p></div></article>
+          <article class="cell svc reveal"><span class="strip mono"><span data-i18n="services.tag">Service</span><span>03</span></span><div class="cell-body"><svg class="svc-ico" viewBox="0 0 32 32" aria-hidden="true"><circle pathLength="100" cx="12" cy="13" r="7"/><circle pathLength="100" cx="20" cy="13" r="7"/><circle pathLength="100" cx="16" cy="20" r="7"/></svg><h3 data-i18n="services.s3.title">Color Grading</h3><p data-i18n="services.s3.desc"></p></div></article>
+          <article class="cell svc reveal"><span class="strip mono"><span data-i18n="services.tag">Service</span><span>04</span></span><div class="cell-body"><svg class="svc-ico" viewBox="0 0 32 32" aria-hidden="true"><rect pathLength="100" x="10" y="3" width="12" height="26" rx="3"/><path pathLength="100" d="M14.5 12.5v6l5-3z"/><path pathLength="100" d="M14.5 25.5h3"/></svg><h3 data-i18n="services.s4.title">Social Media Content</h3><p data-i18n="services.s4.desc"></p></div></article>
+          <article class="cell svc reveal"><span class="strip mono"><span data-i18n="services.tag">Service</span><span>05</span></span><div class="cell-body"><svg class="svc-ico" viewBox="0 0 32 32" aria-hidden="true"><path pathLength="100" d="M3 16h2M8 11v10M12 6v20M16 12v8M20 8v16M24 13v6M28 15v2"/></svg><h3 data-i18n="services.s5.title">Sound Design</h3><p data-i18n="services.s5.desc"></p></div></article>
+          <article class="cell svc reveal"><span class="strip mono"><span data-i18n="services.tag">Service</span><span>06</span></span><div class="cell-body"><svg class="svc-ico" viewBox="0 0 32 32" aria-hidden="true"><path pathLength="100" d="M3 12l13-6 13 6-13 6z"/><path pathLength="100" d="M9 15v6c0 2 3.5 4 7 4s7-2 7-4v-6"/><path pathLength="100" d="M29 12v7"/></svg><h3 data-i18n="services.s6.title">Motion Design Instruction</h3><p data-i18n="services.s6.desc"></p></div></article>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="sec" id="contact">
+      <div class="frame">
+        <div class="sbar mono" data-track="A1" data-color="c">
+          <span class="trk">A1</span>
+          <span class="sbar-title"><b>04</b> / <span data-i18n="contact.label">Get In Touch</span></span>
+          <span class="sbar-tc" dir="ltr"></span>
+          <span class="sbar-meta" data-i18n="contact.meta">WhatsApp · Instagram · YouTube</span>
+        </div>
+        <header class="shead shead-center reveal">
+          <p class="mono kicker" data-i18n="contact.kicker">Flexible timelines · quality delivery</p>
+          <h2><span data-i18n="contact.t1">Let's create</span> <em data-i18n="contact.t2">together.</em></h2>
+          <p data-i18n="contact.subheading"></p>
+          <div class="hero-ctas">
+            <a href="https://wa.me/201127402410" target="_blank" rel="noopener" class="hbtn hbtn-solid"><span data-i18n="contact.whatsapp">WhatsApp Business</span></a>
+            <a href="#work" class="hbtn" data-i18n="hero.cta1">View My Work</a>
+          </div>
+        </header>
+
+        <!-- Social links as brand tiles -->
+        <ul class="grid grid-reach">
+          <li class="cell reveal"><a class="reach" href="https://wa.me/201127402410" target="_blank" rel="noopener" style="--brand:#25d366"><img src="assets/icons/whatsapp.png" alt="" width="64" height="64"><span>WhatsApp</span></a></li>
+          <li class="cell reveal"><a class="reach" href="https://www.instagram.com/morfi.28i/" target="_blank" rel="noopener" style="--brand:#e1306c"><img src="assets/icons/instagram.png" alt="" width="64" height="64"><span>Instagram</span></a></li>
+          <li class="cell reveal"><a class="reach" href="https://www.youtube.com/@Morfi.28" target="_blank" rel="noopener" style="--brand:#ff0000"><img src="assets/icons/youtube.png" alt="" width="64" height="64"><span>YouTube</span></a></li>
+          <li class="cell reveal"><a class="reach" href="https://www.facebook.com/morfi.28i" target="_blank" rel="noopener" style="--brand:#1877f2"><img src="assets/icons/facebook.png" alt="" width="64" height="64"><span>Facebook</span></a></li>
+        </ul>
+
+        <div class="grid grid-contact">
+          <!-- Brief form styled as an export dialog -->
+          <form class="cell form export reveal" id="contactForm" novalidate>
+            <div class="export-bar mono" dir="ltr">
+              <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span>EXPORT — PROJECT_BRIEF</span>
+              <span class="export-fmt">H.264 · 4K</span>
+            </div>
+            <div class="form-body">
+              <p class="form-title" data-i18n="contact.heading">Ready to start your next project?</p>
+              <label class="ffield">
+                <span class="f-label mono" data-i18n="form.name">Your Name</span>
+                <input type="text" name="name" autocomplete="name" required>
+              </label>
+              <fieldset class="ffield" id="serviceField">
+                <legend class="f-label mono" data-i18n="form.service">Service Needed</legend>
+                <div class="chips-pick">
+                  <label class="chip-opt"><input type="checkbox" name="service"><span data-i18n="form.opt1">Video Editing</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="service"><span data-i18n="form.opt2">Motion Graphics</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="service"><span data-i18n="form.opt3">Color Grading</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="service"><span data-i18n="form.optReels">Reels & Shorts</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="service"><span data-i18n="form.optYt">YouTube Videos</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="service"><span data-i18n="form.optAds">Ads & Commercials</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="service"><span data-i18n="form.optLogo">Logo Animation</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="service"><span data-i18n="form.optSound">Sound Design</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="service"><span data-i18n="form.optEvent">Event Coverage</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="service"><span data-i18n="form.optPodcast">Podcast Editing</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="service"><span data-i18n="form.optDoc">Documentary</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="service"><span data-i18n="form.optMv">Music Video</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="service"><span data-i18n="form.optProduct">Product Video</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="service"><span data-i18n="form.optExplainer">Explainer Video</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="service"><span data-i18n="form.optKinetic">Kinetic Typography</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="service"><span data-i18n="form.optComp">Compositing & VFX</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="service"><span data-i18n="form.optSubs">Subtitles & Captions</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="service"><span data-i18n="form.optTitles">Titles & Lower Thirds</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="service"><span data-i18n="form.optIntro">Intro & Outro</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="service"><span data-i18n="form.opt4">Social Media Content</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="service"><span data-i18n="form.optCourse">Motion Design Course</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="service"><span data-i18n="form.opt5">Other</span></label>
+                </div>
+              </fieldset>
+              <fieldset class="ffield">
+                <legend class="f-label mono" data-i18n="form.platform">Platform</legend>
+                <div class="chips-pick">
+                  <label class="chip-opt"><input type="checkbox" name="platform"><span data-i18n="form.pYt">YouTube</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="platform"><span data-i18n="form.pIg">Instagram</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="platform"><span data-i18n="form.pTt">TikTok</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="platform"><span data-i18n="form.pFb">Facebook</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="platform"><span data-i18n="form.pSnap">Snapchat</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="platform"><span data-i18n="form.pLi">LinkedIn</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="platform"><span data-i18n="form.pTv">TV & Cinema</span></label>
+                  <label class="chip-opt"><input type="checkbox" name="platform"><span data-i18n="form.pWeb">Website</span></label>
+                </div>
+              </fieldset>
+              <fieldset class="ffield">
+                <legend class="f-label mono" data-i18n="form.length">Video length</legend>
+                <div class="chips-pick">
+                  <label class="chip-opt"><input type="radio" name="length"><span data-i18n="form.l1">Under 30s</span></label>
+                  <label class="chip-opt"><input type="radio" name="length"><span data-i18n="form.l2">30–60s</span></label>
+                  <label class="chip-opt"><input type="radio" name="length"><span data-i18n="form.l3">1–3 min</span></label>
+                  <label class="chip-opt"><input type="radio" name="length"><span data-i18n="form.l4">3–10 min</span></label>
+                  <label class="chip-opt"><input type="radio" name="length"><span data-i18n="form.l5">10+ min</span></label>
+                </div>
+              </fieldset>
+              <label class="ffield">
+                <span class="f-label mono" data-i18n="form.budget">Expected budget</span>
+                <input type="text" name="budget" inputmode="text" autocomplete="off" placeholder="e.g. $200–400" data-i18n-ph="form.budgetPh">
+              </label>
+              <fieldset class="ffield">
+                <legend class="f-label mono" data-i18n="form.when">Timeline</legend>
+                <div class="chips-pick">
+                  <label class="chip-opt"><input type="radio" name="when"><span data-i18n="form.w0">Tomorrow</span></label>
+                  <label class="chip-opt"><input type="radio" name="when"><span data-i18n="form.w1">ASAP</span></label>
+                  <label class="chip-opt"><input type="radio" name="when"><span data-i18n="form.w5">Within 3 days</span></label>
+                  <label class="chip-opt"><input type="radio" name="when"><span data-i18n="form.w2">This week</span></label>
+                  <label class="chip-opt"><input type="radio" name="when"><span data-i18n="form.w3">This month</span></label>
+                  <label class="chip-opt"><input type="radio" name="when"><span data-i18n="form.w4">Flexible</span></label>
+                </div>
+              </fieldset>
+              <label class="ffield">
+                <span class="f-label mono" data-i18n="form.message">Project Details</span>
+                <textarea name="message" rows="3" required></textarea>
+              </label>
+              <div class="send-wrap">
+                <button type="submit" class="send">
+                  <img src="assets/icons/whatsapp.png" alt="" width="22" height="22">
+                  <span data-i18n="form.submit">Send on WhatsApp</span>
+                </button>
+                <div class="render" aria-hidden="true"><i></i></div>
+                <p class="form-note mono" data-i18n="form.note">Opens WhatsApp with your message ready to send.</p>
+              </div>
+            </div>
+          </form>
+
+          <!-- Brand card with clip-style metadata -->
+          <div class="cell brand-card reveal">
+            <span class="s-brand-meta mono"><span class="rec"><i></i>REC</span><span dir="ltr">MORPHINE_MASTER.MOV</span></span>
+            <span class="s-brand-name">Morphine<span class="s-dot">.</span></span>
+            <p class="brand-desc" data-i18n="footer.desc">Motion designer and video editor crafting visual stories that move. Based in Egypt, working worldwide.</p>
+            <dl class="meta">
+              <div><dt class="mono" data-i18n="meta.loc">Location</dt><dd data-i18n="hero.location">Egypt — Worldwide</dd></div>
+              <div><dt class="mono" data-i18n="meta.lang">Languages</dt><dd data-i18n="meta.langVal">Arabic · English</dd></div>
+              <div><dt class="mono" data-i18n="meta.formats">Formats</dt><dd dir="ltr">9:16 · 16:9 · 1:1</dd></div>
+              <div><dt class="mono" data-i18n="meta.contact">Fastest reply</dt><dd>WhatsApp</dd></div>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="frame">
+      <div class="foot-row">
+        <a href="#top" class="logo-f"><span class="logo-dot" aria-hidden="true"></span>Morphine</a>
+        <nav class="foot-links" aria-label="Footer">
+          <a href="#work" data-i18n="nav.work">Work</a>
+          <a href="#about" data-i18n="nav.about">About</a>
+          <a href="#services" data-i18n="nav.services">Services</a>
+          <a href="#contact" data-i18n="nav.contact">Contact</a>
+        </nav>
+        <div class="foot-social">
+          <a href="https://wa.me/201127402410" target="_blank" rel="noopener" aria-label="WhatsApp"><img src="assets/icons/whatsapp.png" alt="" width="22" height="22"></a>
+          <a href="https://www.instagram.com/morfi.28i/" target="_blank" rel="noopener" aria-label="Instagram"><img src="assets/icons/instagram.png" alt="" width="22" height="22"></a>
+          <a href="https://www.youtube.com/@Morfi.28" target="_blank" rel="noopener" aria-label="YouTube"><img src="assets/icons/youtube.png" alt="" width="22" height="22"></a>
+          <a href="https://www.facebook.com/morfi.28i" target="_blank" rel="noopener" aria-label="Facebook"><img src="assets/icons/facebook.png" alt="" width="22" height="22"></a>
+        </div>
+      </div>
+      <div class="credits" aria-label="Credits">
+        <div class="credits-roll">
+          <dl class="credits-list">
+            <div><dt data-i18n="credits.directed">Directed by</dt><dd>MORFI</dd></div>
+            <div><dt data-i18n="credits.edited">Edited by</dt><dd>MORFI</dd></div>
+            <div><dt data-i18n="credits.motion">Motion design</dt><dd>MORFI</dd></div>
+            <div><dt data-i18n="credits.grade">Color grade</dt><dd>MORFI</dd></div>
+            <div><dt data-i18n="credits.sound">Sound design</dt><dd>MORFI</dd></div>
+            <div><dt data-i18n="credits.coffee">Coffee</dt><dd data-i18n="credits.coffeeVal">A lot of it</dd></div>
+            <div><dt data-i18n="credits.shot">Made in</dt><dd data-i18n="credits.shotVal">Egypt</dd></div>
+            <div><dt data-i18n="credits.client">Starring</dt><dd data-i18n="credits.clientVal">You, next</dd></div>
+          </dl>
+        </div>
+      </div>
+      <div class="sbar mono footer-bar">
+        <span>© <span id="year">2026</span> Morphine — Morfi. <span data-i18n="footer.rights">All rights reserved.</span></span>
+        <span class="kbd-hint" dir="ltr"><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd> <span data-i18n="shuttle.label">shuttle</span></span>
+        <a href="#top" data-i18n="footer.top">Back to top ↑</a>
+      </div>
+      <p class="footer-big" aria-hidden="true">MORPHINE</p>
+    </div>
+  </footer>
+
+  <!-- Grade the site: visitors try colour-grading looks on the whole page -->
+  <div class="grade" id="grade">
+    <div class="grade-panel" id="gradePanel" role="dialog" aria-labelledby="gradeTitle" hidden>
+      <p class="mono grade-title" id="gradeTitle" data-i18n="grade.title">Grade this site</p>
+      <div class="grade-list">
+        <button type="button" class="g-item" data-lut="none" style="--g: saturate(1)">
+          <span class="g-thumb"><img src="assets/work/crf0gr.jpg" alt="" width="72" height="128" loading="lazy" decoding="async"></span>
+          <span class="mono">Original</span>
+        </button>
+        <button type="button" class="g-item" data-lut="teal" style="--g: saturate(1.35) contrast(1.12) sepia(.12) hue-rotate(-10deg)">
+          <span class="g-thumb"><img src="assets/work/crf0gr.jpg" alt="" width="72" height="128" loading="lazy" decoding="async"></span>
+          <span class="mono">Teal & Orange</span>
+        </button>
+        <button type="button" class="g-item" data-lut="noir" style="--g: grayscale(1) contrast(1.35) brightness(.95)">
+          <span class="g-thumb"><img src="assets/work/crf0gr.jpg" alt="" width="72" height="128" loading="lazy" decoding="async"></span>
+          <span class="mono">Noir</span>
+        </button>
+        <button type="button" class="g-item" data-lut="kodak" style="--g: sepia(.42) saturate(1.2) contrast(1.08) brightness(1.03)">
+          <span class="g-thumb"><img src="assets/work/crf0gr.jpg" alt="" width="72" height="128" loading="lazy" decoding="async"></span>
+          <span class="mono">Kodak 2383</span>
+        </button>
+        <button type="button" class="g-item" data-lut="bleach" style="--g: saturate(.38) contrast(1.45) brightness(1.06)">
+          <span class="g-thumb"><img src="assets/work/crf0gr.jpg" alt="" width="72" height="128" loading="lazy" decoding="async"></span>
+          <span class="mono">Bleach Bypass</span>
+        </button>
+      </div>
+      <p class="grade-note" data-i18n="grade.note">Color grading is one of my services. Pick a look and watch the whole site change.</p>
+    </div>
+    <button type="button" class="grade-btn" id="gradeBtn" aria-expanded="false" aria-controls="gradePanel">
+      <span class="wheel" aria-hidden="true"></span>
+      <span class="mono grade-label">LUT · <b id="gradeName">Original</b></span>
+    </button>
+  </div>
+  <div class="shuttle mono" id="shuttle" aria-live="polite"></div>
+  <div class="tip mono" id="tip" role="status" hidden><span data-i18n="shuttle.tip">Tip: press J · K · L to move through the site, like in your editor.</span><button type="button" id="tipClose" aria-label="Close">×</button></div>
+  <div class="wipe" aria-hidden="true"><b class="mono" id="wipeName"></b></div>
+
+  <dialog class="player" id="player" aria-label="Video player">
+    <button type="button" class="player-close" id="playerClose" aria-label="Close">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <div class="player-frame" id="playerFrame"></div>
+  </dialog>
+
+  <script src="i18n.js?v=7"></script>
+  <script src="main.js?v=7"></script>
+</body>
+</html>
