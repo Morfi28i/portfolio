@@ -383,10 +383,11 @@
   ];
   const small = innerWidth < 700;
   // rx/ry are fractions of the hero's half-width/half-height; depth pushes the far side back
+  // each clip appears once: two on the inner orbit, three on the outer
   const rings = small
-    ? [{ n: 5, rx: 0.92, ry: 0.5, depth: 200, speed: 0.14 }, { n: 6, rx: 1.12, ry: 0.78, depth: 300, speed: -0.09 }]
-    : [{ n: 7, rx: 0.8, ry: 0.66, depth: 260, speed: 0.1 },
-       { n: 9, rx: 1.02, ry: 0.92, depth: 380, speed: -0.06 }];
+    ? [{ n: 2, rx: 0.92, ry: 0.5, depth: 200, speed: 0.14 }, { n: 3, rx: 1.12, ry: 0.78, depth: 300, speed: -0.09 }]
+    : [{ n: 2, rx: 0.8, ry: 0.66, depth: 260, speed: 0.1 },
+       { n: 3, rx: 1.02, ry: 0.92, depth: 380, speed: -0.06 }];
   const shots = [];
   let idx = 0;
   rings.forEach((ring, r) => {
