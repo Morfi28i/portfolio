@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,600..800&family=Instrument+Serif:ital@1&family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=7">
+  <link rel="stylesheet" href="styles.css?v=10">
 
   <!-- Set theme before paint to avoid a flash -->
   <script>
@@ -43,9 +43,11 @@
   <!-- Side timeline ruler + travelling section titles -->
   <div class="ruler" aria-hidden="true">
     <div class="ruler-track" id="rulerTrack"></div>
-    <span class="ruler-head"><b id="rulerTc">00:00</b></span>
+    <span class="ruler-view"></span>
+    <span class="ruler-head"><span class="odo" id="odo"></span></span>
     <span class="ruler-hover" id="rulerHover"><b></b></span>
   </div>
+  <div class="ruler-map" aria-hidden="true"></div>
 <nav class="train" id="train" aria-label="Sections"></nav>
   <div class="progress" aria-hidden="true"><span></span></div>
 
@@ -549,7 +551,7 @@
     <div class="player-frame" id="playerFrame"></div>
   </dialog>
 
-  <script src="i18n.js?v=7"></script>
-  <script src="main.js?v=7"></script>
+  <script src="i18n.js?v=10"></script>
+  <script src="main.js?v=10"></script>
 </body>
 </html>

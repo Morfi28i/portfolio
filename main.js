@@ -53,8 +53,8 @@
     const wm = document.getElementById('wordmark');
     const text = wm.textContent;
     wm.setAttribute('aria-label', text);
-    const parts = lang === 'ar' ? arabicLetters(text) : [...text];
-    wm.classList.toggle('split-ar', lang === 'ar');
+    // Arabic stays one connected word here; it only breaks into letters while flying
+    const parts = lang === 'ar' ? [text] : [...text];
     // Letters cut in from the centre outward
     const mid = (parts.length - 1) / 2;
     wm.innerHTML = parts.map((ch, i) => `<span class="ch" aria-hidden="true" style="--i:${Math.abs(i - mid)}">${ch}</span>`).join('');
@@ -111,55 +111,110 @@
     intro.remove();
   }
 
-  /* ---------- Side timeline ruler ---------- */
-  // The whole page is one timeline (40px of scroll = 1s). The ruler stays put and the
-  // red playhead travels down it as you scroll. Each section shows as a coloured clip.
+  /* ---------- Side ruler ---------- */
+  // A 0–100% scale of the page. Normally it's spread out and scrolls past a moving
+  // playhead; hovering zooms out to the whole page like a minimap, with the visible
+  // part highlighted and section names beside it. Click anywhere to jump there.
   const ruler = document.querySelector('.ruler');
   const rulerTrack = document.getElementById('rulerTrack');
   const rulerHead = document.querySelector('.ruler-head');
-  const rulerTc = document.getElementById('rulerTc');
+  const rulerView = document.querySelector('.ruler-view');
   const rulerHover = document.getElementById('rulerHover');
-  const STEP = 40;
+  const rulerMap = document.querySelector('.ruler-map');
+  const odo = document.getElementById('odo');
+  const STEP = 40;   // px of scroll per second, for the section bars' timecodes
   const fmt = (sec) => `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
   const maxScroll = () => Math.max(1, document.documentElement.scrollHeight - innerHeight);
-  const PAD = 18; // keep the playhead clear of the ruler's ends
-  const span = () => ruler.clientHeight - PAD * 2;
+  const PAD = 18, SPREAD = 24;   // spacing per 1% when not zoomed out
+  let ticks = [], rClips = [], marks = [], open = false;
+  const cur = { s: SPREAD, y: PAD, head: PAD };
 
+  odo.innerHTML = [0, 1, 2].map(() => `<span class="odo-d"><span>${'0123456789'.split('').map((d) => `<i>${d}</i>`).join('')}</span></span>`).join('') + '<span class="odo-pct">%</span>';
+  const odoCols = [...odo.querySelectorAll('.odo-d > span')];
+  let lastPct = -1;
+  const setOdo = (pct) => {
+    if (pct === lastPct) return;
+    lastPct = pct;
+    String(pct).padStart(3, '0').split('').forEach((d, i) => { odoCols[i].style.transform = `translateY(${-d}em)`; });
+  };
+
+  const sections = () => [...document.querySelectorAll('.hero, .sec')].map((sec) => {
+    const top = sec.getBoundingClientRect().top + scrollY;
+    return { sec, a: Math.min(1, top / maxScroll()), b: Math.min(1, (top + sec.offsetHeight) / maxScroll()) };
+  });
   const buildRuler = () => {
-    const H = span(), total = maxScroll() / STEP;
-    const n = Math.max(10, Math.round(H / 14));      // a tick every ~14px
     let html = '';
-    for (let i = 0; i <= n; i++) {
-      const major = i % 5 === 0;
-      html += `<span class="tick${major ? ' major' : ''}" style="top:${PAD + (i / n) * H}px">${major ? `<b>${fmt(Math.round((i / n) * total))}</b>` : ''}</span>`;
+    for (let i = 0; i <= 100; i++) {
+      html += `<span class="tick${i % 5 === 0 ? ' major' : ''}">${i % 5 === 0 ? `<b>${i}</b>` : ''}</span>`;
     }
-    // Sections as clips on the track
-    document.querySelectorAll('.sec').forEach((sec) => {
-      const bar = sec.querySelector('.sbar');
-      const top = sec.getBoundingClientRect().top + scrollY;
-      const a = Math.min(1, top / maxScroll()), b = Math.min(1, (top + sec.offsetHeight) / maxScroll());
-      html += `<span class="ruler-clip" data-color="${bar?.dataset.color || 'a'}" data-for="${sec.id}" style="top:${PAD + a * H}px;height:${Math.max(4, (b - a) * H - 3)}px"></span>`;
+    const secs = sections();
+    secs.forEach(({ sec }) => {
+      if (sec.classList.contains('hero')) return;
+      html += `<span class="ruler-clip" data-color="${sec.querySelector('.sbar')?.dataset.color || 'a'}"></span>`;
     });
     rulerTrack.innerHTML = html;
+    ticks = [...rulerTrack.querySelectorAll('.tick')];
+    rClips = [...rulerTrack.querySelectorAll('.ruler-clip')].map((el, i) => ({ el, ...secs.filter((s) => !s.sec.classList.contains('hero'))[i] }));
+    // section names for the zoomed-out view
+    const names = [t('hero.title'), t('nav.work'), t('nav.about'), t('nav.services'), t('nav.contact')];
+    rulerMap.innerHTML = secs.map((s, i) => `<b>${names[i] || ''}</b>`).join('');
+    marks = [...rulerMap.children].map((el, i) => ({ el, a: secs[i].a, b: secs[i].b }));
   };
-  const moveRuler = () => {
+
+  // Where things should be for the current scroll and mode
+  const target = () => {
     const p = Math.min(1, scrollY / maxScroll());
-    rulerHead.style.transform = `translateY(${(PAD + p * span()).toFixed(1)}px)`;
-    rulerTc.textContent = fmt(Math.floor(scrollY / STEP));
+    const H = ruler.clientHeight - PAD * 2;
+    if (open) {
+      const s = H / 100;
+      return { p, s, y: PAD, head: PAD + p * 100 * s };
+    }
+    const head = PAD + p * H;
+    return { p, s: SPREAD, y: head - p * 100 * SPREAD, head };
   };
-  // Hover shows the timecode under the cursor; click jumps there
-  const yToScroll = (clientY) => {
-    const y = clientY - ruler.getBoundingClientRect().top - PAD;
-    return Math.min(1, Math.max(0, y / span())) * maxScroll();
+  let raf = 0;
+  const render = () => {
+    raf = 0;
+    const tg = target();
+    const k = 0.2;
+    cur.s += (tg.s - cur.s) * k; cur.y += (tg.y - cur.y) * k; cur.head += (tg.head - cur.head) * k;
+    const settled = Math.abs(tg.s - cur.s) < 0.01 && Math.abs(tg.y - cur.y) < 0.2 && Math.abs(tg.head - cur.head) < 0.2;
+    if (settled) Object.assign(cur, { s: tg.s, y: tg.y, head: tg.head });
+    const dense = cur.s < 10;   // hide minor labels when zoomed out
+    ticks.forEach((tk, i) => {
+      tk.style.transform = `translateY(${(cur.y + i * cur.s).toFixed(1)}px)`;
+      tk.style.opacity = dense && i % 5 ? '.22' : '';
+    });
+    rClips.forEach(({ el, a, b }) => {
+      el.style.transform = `translateY(${(cur.y + a * 100 * cur.s).toFixed(1)}px) scaleY(${Math.max(4, (b - a) * 100 * cur.s - 3).toFixed(1)})`;
+      el.style.height = '1px';
+    });
+    const vA = scrollY / document.documentElement.scrollHeight, vB = (scrollY + innerHeight) / document.documentElement.scrollHeight;
+    rulerView.style.transform = `translateY(${(cur.y + vA * 100 * cur.s).toFixed(1)}px) scaleY(${Math.max(2, (vB - vA) * 100 * cur.s).toFixed(1)})`;
+    rulerHead.style.transform = `translateY(${cur.head.toFixed(1)}px)`;
+    const here = marks.findIndex((m) => tg.p >= m.a && tg.p < m.b + 0.001);
+    marks.forEach((m, i) => {
+      m.el.style.top = `${(cur.y + m.a * 100 * cur.s - 6).toFixed(1)}px`;
+      m.el.classList.toggle('here', i === here);
+    });
+    setOdo(Math.round(tg.p * 100));
+    if (!settled) raf = requestAnimationFrame(render);
   };
+  const moveRuler = () => { if (!raf) raf = requestAnimationFrame(render); };
+
+  // Hover zooms out; the crosshair shows the percent under the cursor; click jumps there
+  const pctAt = (clientY) => Math.min(100, Math.max(0, (clientY - ruler.getBoundingClientRect().top - cur.y) / cur.s));
+  ruler.addEventListener('pointerenter', () => { open = true; ruler.classList.add('open'); rulerMap.classList.add('open'); moveRuler(); });
+  ruler.addEventListener('pointerleave', () => {
+    open = false; ruler.classList.remove('open', 'hovering'); rulerMap.classList.remove('open'); moveRuler();
+  });
   ruler.addEventListener('pointermove', (e) => {
     rulerHover.style.transform = `translateY(${e.clientY - ruler.getBoundingClientRect().top}px)`;
-    rulerHover.firstElementChild.textContent = fmt(Math.floor(yToScroll(e.clientY) / STEP));
+    rulerHover.firstElementChild.textContent = `${String(Math.round(pctAt(e.clientY))).padStart(3, '0')}%`;
     ruler.classList.add('hovering');
   });
-  ruler.addEventListener('pointerleave', () => ruler.classList.remove('hovering'));
   ruler.addEventListener('click', (e) => {
-    scrollTo({ top: yToScroll(e.clientY), behavior: reduceMotion ? 'auto' : 'smooth' });
+    scrollTo({ top: (pctAt(e.clientY) / 100) * maxScroll(), behavior: reduceMotion ? 'auto' : 'smooth' });
   });
   // Each section bar shows where that section sits on the timeline (in → out)
   const stampTracks = () => {
@@ -174,6 +229,7 @@
   addEventListener('resize', refreshRuler);
   addEventListener('load', refreshRuler);
   document.fonts?.ready.then(refreshRuler);
+  document.addEventListener('langchange', refreshRuler);
   refreshRuler();
   addEventListener('scroll', moveRuler, { passive: true });
 
@@ -457,7 +513,8 @@
       const right = vw - 84, railX = vw - 28;
       items.forEach((it, i) => {
         let x = 0;
-        it.wid = it.letters.map((s) => s.offsetWidth);
+        const seam = lang === 'ar' ? 0.8 : 0;   // overlap joined Arabic letters so no hairline shows
+        it.wid = it.letters.map((s) => { const t0 = s.style.transform; s.style.transform = 'none'; const w = s.getBoundingClientRect().width - seam; s.style.transform = t0; return w; });
         it.adv = it.wid.map((w) => { const c = x + w / 2; x += w; return c; });
         it.W = x;
         it.yTop = (ar ? 112 : 100) + i * GAP;
@@ -553,8 +610,9 @@
             const pk = ease(raw);
             const lift = Math.sin(Math.PI * raw);
             const off = k - (L - 1) / 2;
-            const r = (chs[k] || chs[0]).getBoundingClientRect();
-            const fromX = r.left + r.width / 2;
+            const whole = chs.length !== L;
+            const r = (whole ? chs[0] : chs[k]).getBoundingClientRect();
+            const fromX = whole ? r.left + (it.adv[k] / it.W) * r.width : r.left + r.width / 2;
             // the wordmark scrolls away under the header, so letters peel off and stay on screen
             const fromY = Math.max(r.top + r.height / 2, 150);
             const toX = it.right - (it.W - it.adv[k]) * SMALL;

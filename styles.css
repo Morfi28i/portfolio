@@ -312,45 +312,73 @@ h1, h2, h3, p { margin: 0; }
 .o2 { stroke: var(--teal); stroke-dasharray: 340 760; animation: spin 52s linear infinite reverse; }
 .o3 { stroke: var(--rec); stroke-dasharray: 220 1160; animation: spin 70s linear infinite; opacity: .6; }
 
-/* Side timeline ruler */
+/* Side ruler: percentage scale that scrolls with the page; hover zooms out to the whole page */
 .ruler {
-  position: fixed; top: 48px; bottom: 0; inset-inline-end: 0; width: 56px; z-index: 40; pointer-events: none;
-  overflow: hidden; direction: ltr;
+  position: fixed; top: 48px; bottom: 0; right: 0; width: 60px; z-index: 40;
+  overflow: hidden; direction: ltr; cursor: crosshair;
 }
-.ruler { pointer-events: auto; cursor: crosshair; }
 .ruler::before {
   /* frosted strip so ticks stay legible over content */
-  content: ""; position: absolute; inset: 0; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  background: color-mix(in srgb, var(--bg) 50%, transparent);
-  -webkit-mask: linear-gradient(to left, #000 40%, transparent); mask: linear-gradient(to left, #000 40%, transparent);
+  content: ""; position: absolute; inset: 0; backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px);
+  background: color-mix(in srgb, var(--bg) 55%, transparent);
+  -webkit-mask: linear-gradient(to left, #000 40%, rgb(0 0 0 / .7)); mask: linear-gradient(to left, #000 40%, rgb(0 0 0 / .7));
+  transition: background-color .3s;
 }
-.ruler-hover { position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--text); opacity: 0; transition: opacity .15s; }
-.ruler.hovering .ruler-hover { opacity: .9; }
-.ruler-hover b {
-  position: absolute; right: 22px; bottom: 4px; padding: 2px 4px; font: 500 9px/1 var(--mono);
-  background: var(--text); color: var(--bg); letter-spacing: .06em;
-}
-.ruler-track { position: absolute; inset: 0 0 auto; will-change: transform; }
-.tick { position: absolute; right: 0; height: 1px; width: 8px; background: var(--muted); opacity: .45; }
-.tick.major { width: 18px; opacity: .9; }
+.ruler.open::before { background: color-mix(in srgb, var(--bg) 80%, transparent); }
+.ruler-track { position: absolute; inset: 0; }
+.tick { position: absolute; top: 0; right: 0; height: 1px; width: 10px; background: var(--text); opacity: .35; will-change: transform; }
+.tick.major { width: 20px; opacity: .75; }
 .tick b {
-  position: absolute; right: 24px; top: -6px; font: 400 9px/1 var(--mono); letter-spacing: .06em;
-  color: var(--muted); white-space: nowrap;
-}
-.ruler-head {
-  position: absolute; top: 0; right: 0; left: 0; height: 1px; background: var(--rec); z-index: 2;
-  box-shadow: 0 0 10px var(--rec); transition: transform .12s linear;
+  position: absolute; right: 24px; top: -5px; font: 400 9px/1 var(--mono); letter-spacing: .08em;
+  color: var(--text); opacity: .55; white-space: nowrap;
 }
 .ruler-clip {
-  --c: var(--accent); position: absolute; right: 3px; width: 3px; background: var(--c); opacity: .55; border-radius: 1px;
+  --c: var(--accent); position: absolute; top: 0; right: 2px; width: 2px; background: var(--c); opacity: .6; border-radius: 1px;
+  transform-origin: top; will-change: transform;
 }
 .ruler-clip[data-color="b"] { --c: var(--teal); }
 .ruler-clip[data-color="c"] { --c: var(--rec); }
-.ruler-head::after { content: ""; position: absolute; right: 0; top: -4px; border: 4.5px solid transparent; border-right-color: var(--rec); }
-.ruler-head b {
-  position: absolute; right: 22px; bottom: 4px; font: 500 9px/1 var(--mono); color: var(--rec);
-  font-variant-numeric: tabular-nums; letter-spacing: .06em;
+/* the part of the page that's on screen, shown when zoomed out */
+.ruler-view {
+  position: absolute; top: 0; left: 0; right: 0; height: 1px; transform-origin: top;
+  background: color-mix(in srgb, var(--text) 10%, transparent);
+  border-block: 1px solid color-mix(in srgb, var(--text) 22%, transparent);
+  opacity: 0; transition: opacity .3s;
 }
+.ruler.open .ruler-view { opacity: 1; }
+.ruler-head {
+  position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--rec); z-index: 2;
+  box-shadow: 0 0 6px var(--rec); will-change: transform;
+}
+/* odometer readout: each digit is a column of 0–9 that rolls into place */
+.odo {
+  position: absolute; right: 2px; top: 4px; display: flex; align-items: flex-start;
+  font: 500 9px/1 var(--mono); letter-spacing: .08em; color: var(--rec);
+}
+.odo-d { display: block; height: 1em; overflow: hidden; }
+.odo-d span { display: flex; flex-direction: column; transition: transform .45s cubic-bezier(.2, .8, .2, 1); }
+.odo-d i { font-style: normal; height: 1em; }
+.odo-pct { margin-left: 1px; }
+.ruler-hover { position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--text); opacity: 0; transition: opacity .15s; z-index: 3; }
+.ruler.hovering .ruler-hover { opacity: .9; }
+.ruler-hover b {
+  position: absolute; right: 24px; bottom: 3px; padding: 2px 4px; font: 500 9px/1 var(--mono);
+  background: var(--text); color: var(--bg); letter-spacing: .06em;
+}
+/* section names beside the ruler while zoomed out */
+.ruler-map { position: fixed; top: 48px; bottom: 0; right: 60px; width: 220px; z-index: 40; pointer-events: none; }
+.ruler-map b {
+  position: absolute; top: 0; right: 10px; font-family: "Archivo", var(--font); font-stretch: 125%; font-weight: 700;
+  font-size: 13px; letter-spacing: .02em; text-transform: uppercase; color: var(--text); white-space: nowrap;
+  text-shadow: 0 0 4px var(--bg), 0 0 10px var(--bg);
+  opacity: 0; transform: translateX(10px); transition: opacity .3s, transform .4s var(--ease);
+}
+:lang(ar) .ruler-map b { font-family: var(--font); font-size: 15px; letter-spacing: 0; }
+.ruler-map b.here { color: var(--accent); }
+.ruler-map.open b { opacity: 1; transform: none; }
+.ruler-map.open b:nth-child(2) { transition-delay: .03s; } .ruler-map.open b:nth-child(3) { transition-delay: .06s; }
+.ruler-map.open b:nth-child(4) { transition-delay: .09s; } .ruler-map.open b:nth-child(5) { transition-delay: .12s; }
+.ruler.open ~ .train { opacity: .15 !important; transition: opacity .3s; }
 
 /* Travelling section titles */
 .train { position: fixed; inset: 0; z-index: 41; pointer-events: none; }
@@ -364,7 +392,7 @@ h1, h2, h3, p { margin: 0; }
 :lang(ar) .train-ch { font-family: var(--font); letter-spacing: 0; font-size: 46px; font-weight: 700; }
 .train-hit { position: absolute; cursor: pointer; }
 .js .ruler, .js .train { opacity: 0; animation: fade-in 1s ease-out calc(var(--intro) + .9s) forwards; }
-@media (max-width: 900px) { .ruler, .train { display: none; } }
+@media (max-width: 900px) { .ruler, .ruler-map, .train { display: none; } }
 
 /* Film-strip ticker */
 .reel {
