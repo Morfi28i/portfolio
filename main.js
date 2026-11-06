@@ -875,6 +875,13 @@
     let queued = false;
     const request = () => { if (!queued) { queued = true; requestAnimationFrame(() => { queued = false; frame(); }); } };
     addEventListener('scroll', request, { passive: true });
+    // Step aside once the contact details or footer reach the stack
+    const inTheWay = new Set();
+    const awayObserver = new IntersectionObserver((entries) => {
+      entries.forEach((e) => (e.isIntersecting ? inTheWay.add(e.target) : inTheWay.delete(e.target)));
+      nav.classList.toggle('away', inTheWay.size > 0);
+    }, { rootMargin: '0px 0px -55% 0px' });
+    document.querySelectorAll('.grid-contact, .footer').forEach((el) => awayObserver.observe(el));
     addEventListener('resize', () => { layout(); request(); });
     desk.addEventListener('change', () => { layout(); request(); });
     document.addEventListener('langchange', () => { build(); request(); });

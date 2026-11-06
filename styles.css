@@ -378,6 +378,9 @@ h1, h2, h3, p { margin: 0; }
 .ruler-map.open b:nth-child(2) { transition-delay: .03s; } .ruler-map.open b:nth-child(3) { transition-delay: .06s; }
 .ruler-map.open b:nth-child(4) { transition-delay: .09s; } .ruler-map.open b:nth-child(5) { transition-delay: .12s; }
 .ruler.open ~ .train { opacity: .15 !important; transition: opacity .3s; }
+/* the stack steps aside where it would sit on the contact details */
+.train.away { opacity: 0 !important; transition: opacity .3s; }
+.train.away .train-hit { pointer-events: none; }
 
 /* Travelling section titles */
 .train { position: fixed; inset: 0; z-index: 41; pointer-events: none; }
@@ -1080,6 +1083,14 @@ main { counter-reset: sec; }
 .js .toolkit .tool-list li { opacity: 0; transform: translateY(10px); }
 .js .toolkit.in .tool-list li { opacity: 1; transform: none; transition-delay: calc(var(--k, 0) * 60ms); }
 
+.footer-bar { justify-content: space-between; flex-wrap: wrap; gap: 8px 20px; padding-inline: clamp(16px, 2vw, 24px); }
+/* leave room for the section title beside the centred contact heading */
+@media (min-width: 901px) { #contact .shead-center { padding-inline: 0; padding-right: clamp(120px, 17vw, 250px); } }
+@media (min-width: 901px) and (max-width: 1300px) { #contact .shead-center { padding-right: 30vw; } }
+/* long Spanish headings wrap before they reach the stack on small desktops */
+@media (min-width: 901px) and (max-width: 1250px) { :lang(es) .shead h2, :lang(es) .shead > p { max-width: 56vw; } }
+/* in Arabic the heading starts on the right, under the stack, so it moves clear of it */
+@media (min-width: 901px) { [dir="rtl"] .shead:not(.shead-center) { padding-right: clamp(190px, 21vw, 320px); } }
 .dev-credit a { color: var(--accent); }
 .dev-credit a:hover { text-decoration: underline; }
 
