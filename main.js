@@ -170,7 +170,7 @@
     ticks = [...rulerTrack.querySelectorAll('.tick')];
     rClips = [...rulerTrack.querySelectorAll('.ruler-clip')].map((el, i) => ({ el, ...secs.filter((s) => !s.sec.classList.contains('hero'))[i] }));
     // section names for the zoomed-out view
-    const names = [t('hero.title'), t('nav.work'), t('nav.about'), t('nav.services'), t('nav.contact')];
+    const names = [t('hero.title'), t('nav.work'), t('nav.web'), t('nav.about'), t('nav.services'), t('nav.contact')];
     rulerMap.innerHTML = secs.map((s, i) => `<b>${names[i] || ''}</b>`).join('');
     marks = [...rulerMap.children].map((el, i) => ({ el, a: secs[i].a, b: secs[i].b }));
   };
@@ -529,11 +529,11 @@
       if (!e.isIntersecting) return;
       const el = e.target, target = +el.dataset.count;
       countObserver.unobserve(el);
-      if (reduceMotion) { el.textContent = target; return; }
+      if (reduceMotion) { el.textContent = target.toLocaleString('en-US'); return; }
       const t0 = performance.now(), dur = 1400;
       const step = (now) => {
         const p = Math.min((now - t0) / dur, 1);
-        el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
+        el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))).toLocaleString('en-US');
         if (p < 1) requestAnimationFrame(step);
       };
       requestAnimationFrame(step);
@@ -628,6 +628,7 @@
     const sections = [
       { el: document.getElementById('hero'), key: 'hero.title', hero: true },
       { el: document.getElementById('work'), key: 'nav.work' },
+      { el: document.getElementById('web'), key: 'nav.web' },
       { el: document.getElementById('about'), key: 'nav.about' },
       { el: document.getElementById('services'), key: 'nav.services' },
       { el: document.getElementById('contact'), key: 'nav.contact' },
@@ -923,11 +924,11 @@
     }, { passive: true });
     document.documentElement.addEventListener('pointerleave', () => cur.classList.remove('on'));
     document.addEventListener('pointerover', (e) => {
-      const clip = e.target.closest('.clip-card');
+      const clip = e.target.closest('.clip-card, .bx-shot');
       const hot = e.target.closest('a, button, select, input, textarea, label, .ruler');
       cur.classList.toggle('play', !!clip);
       cur.classList.toggle('link', !clip && !!hot);
-      if (clip) cur.firstElementChild.textContent = t('work.play');
+      if (clip) cur.firstElementChild.textContent = t(clip.matches('.clip-card') ? 'work.play' : 'web.visit');
     });
   }
 
@@ -1130,6 +1131,23 @@
     credits.classList.add('in');
     obs.disconnect();
   }, { rootMargin: '0px 0px -10% 0px' }).observe(credits);
+
+  /* ---------- Web projects: no hover on touch, so sites scroll while they're on screen ---------- */
+  if (!finePointer && !reduceMotion) {
+    const siteObserver = new IntersectionObserver((entries) => {
+      entries.forEach((e) => e.target.classList.toggle('auto', e.isIntersecting));
+    }, { threshold: 0.5 });
+    document.querySelectorAll('.bx-shot').forEach((el) => siteObserver.observe(el));
+  }
+
+  /* ---------- Web toolkit chips appear one after another ---------- */
+  const toolkit = document.querySelector('.toolkit');
+  toolkit.querySelectorAll('.tool-list li').forEach((li, k) => li.style.setProperty('--k', k));
+  new IntersectionObserver(([e], obs) => {
+    if (!e.isIntersecting) return;
+    toolkit.classList.add('in');
+    obs.disconnect();
+  }, { rootMargin: '0px 0px -10% 0px' }).observe(toolkit);
 
   document.getElementById('year').textContent = new Date().getFullYear();
 })();
